@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multilingual RAG System</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg-primary: #0d0d14;
+    --bg-secondary: #13131f;
+    --bg-tertiary: #1a1a2e;
+    --bg-card: #1e1e35;
+    --bg-hover: #252545;
+    --bg-input: #1a1a2e;
+    --text-primary: #e8e8f0;
+    --text-secondary: #9090a8;
+    --text-muted: #606078;
+    --accent: #6c7bf0;
+    --accent-hover: #5a6ae0;
+    --accent-subtle: rgba(108, 123, 240, 0.15);
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --error: #f87171;
+    --border: #2a2a3d;
+    --user-bubble: #2a2a4a;
+    --assistant-bubble: #1a1a2e;
+    --radius: 12px;
+    --radius-lg: 16px;
+    --transition: 0.2s ease;
+}
+
+html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+}
+body { animation: pageFadeIn 0.5s ease-out; }
+
+/* Global scrollbar polish */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a3d; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a5d; }
+
+/* ---- Header ---- */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    height: 52px;
+    flex-shrink: 0;
+}
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.header-logo {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+.header-logo:hover { transform: rotate(-4deg) scale(1.05); filter: drop-shadow(0 0 8px rgba(108,123,240,0.4)); }
+.header-logo svg { width: 36px; height: 36px; display: block; }
+.header-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.header-pills {
+    display: flex; gap: 6px;
+}
+.header-pills span {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 3px 12px;
+    border-radius: 14px;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+.header-pills span:hover {
+    color: var(--text-primary);
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(108, 123, 240, 0.3);
+}
+
+/* ---- Layout ---- */
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+.main {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+/* ---- Panels ---- */
+.panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.panel-left {
+    width: 260px;
+    min-width: 220px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+}
+.panel-center {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg-primary);
+}
+.panel-right {
+    width: 240px;
+    min-width: 200px;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border);
+}
+.panel-header {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px 18px 12px;
+}
+
+/* ---- Sources panel ---- */
+.add-sources-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 14px 12px;
+    padding: 10px 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition);
+}
+.add-sources-btn:hover { background: var(--accent-hover); }
+.add-sources-btn svg { width: 14px; height: 14px; }
+
+#file-input { display: none; }
+
+.source-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 12px 12px;
+}
+.source-empty {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+.source-empty-icon {
+    font-size: 28px;
+    opacity: 0.3;
+    margin-bottom: 10px;
+}
+
+.source-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    animation: fadeIn 0.3s ease;
+}
+.source-card-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.source-card-name svg { width: 14px; height: 14px; opacity: 0.6; flex-shrink: 0; }
+.source-card-meta {
+    font-size: 11px;
+    color: var(--success);
+    margin-top: 4px;
+    padding-left: 22px;
+}
+.source-card-error {
+    font-size: 11px;
+    color: var(--error);
+    margin-top: 4px;
+    padding-left: 22px;
+}
+.source-card-loading {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    padding-left: 22px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* ---- Chat ---- */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.messages::-webkit-scrollbar { width: 6px; }
+.messages::-webkit-scrollbar-track { background: transparent; }
+.messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Welcome */
+.welcome {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 20px;
+}
+.welcome-icon {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--accent-subtle);
+    display: flex; align-items: center; justify-content: center;
+}
+.welcome-icon svg { width: 24px; height: 24px; stroke: var(--accent); }
+.welcome-title { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+.welcome-sub { font-size: 14px; color: var(--text-muted); text-align: center; max-width: 400px; line-height: 1.5; }
+.welcome-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 12px;
+    max-width: 500px;
+}
+.chip {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+.chip:hover {
+    background: var(--accent-subtle);
+    border-color: var(--accent);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 123, 240, 0.15);
+}
+.chip:active { transform: translateY(0); }
+
+/* Messages */
+.message {
+    display: flex;
+    flex-direction: column;
+    animation: fadeSlideIn 0.3s ease;
+}
+.message.user { align-items: flex-end; }
+.message.assistant { align-items: flex-start; }
+
+.lang-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    display: inline-block;
+}
+.lang-hi { background: rgba(251, 146, 60, 0.15); color: #fb923c; }
+.lang-en { background: rgba(96, 165, 250, 0.15); color: #60a5fa; }
+.lang-mix { background: rgba(192, 132, 252, 0.15); color: #c084fc; }
+
+.bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: var(--radius-lg);
+    font-size: 14px;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+.message.user .bubble {
+    background: var(--user-bubble);
+    border-bottom-right-radius: 4px;
+    color: var(--text-primary);
+}
+.message.assistant .bubble {
+    background: var(--assistant-bubble);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-bottom-left-radius: 4px;
+    color: var(--text-primary);
+}
+
+/* Markdown */
+.bubble h1, .bubble h2, .bubble h3 { margin: 8px 0 4px; font-size: 15px; font-weight: 600; }
+.bubble p { margin: 4px 0; }
+.bubble ul, .bubble ol { margin: 4px 0; padding-left: 20px; }
+.bubble li { margin: 2px 0; }
+.bubble code {
+    background: rgba(108, 123, 240, 0.1);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+}
+.bubble pre {
+    background: #0a0a12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+    overflow-x: auto;
+}
+.bubble pre code { background: none; padding: 0; font-size: 12px; line-height: 1.5; }
+.bubble strong { font-weight: 600; }
+.bubble em { font-style: italic; color: var(--text-secondary); }
+
+/* Sources in message */
+.sources-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    padding: 5px 12px;
+    background: var(--accent-subtle);
+    border: none;
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition);
+}
+.sources-toggle:hover { background: rgba(108, 123, 240, 0.25); }
+.sources-toggle svg { width: 12px; height: 12px; }
+
+.sources-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+.sources-panel.open {
+    max-height: 600px;
+    margin-top: 8px;
+}
+.source-result {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+}
+.source-result-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+.source-result-file { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.score-pill {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 8px;
+}
+.score-pill.high { background: rgba(74, 222, 128, 0.15); color: var(--success); }
+.score-pill.mid { background: rgba(251, 191, 36, 0.15); color: var(--warning); }
+.score-pill.low { background: rgba(248, 113, 113, 0.15); color: var(--error); }
+.source-result-text { font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-top: 4px; }
+
+/* Typing indicator */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 18px;
+    background: var(--assistant-bubble);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-lg);
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+}
+.typing-dot {
+    width: 6px; height: 6px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* Streaming cursor — blinks while tokens arrive */
+.stream-cursor {
+    display: inline-block;
+    width: 6px;
+    height: 1em;
+    margin-left: 2px;
+    background: var(--accent);
+    border-radius: 1px;
+    vertical-align: text-bottom;
+    animation: cursorBlink 1s steps(2, start) infinite;
+}
+@keyframes cursorBlink { to { visibility: hidden; } }
+
+/* Input area */
+.input-area {
+    padding: 12px 20px 16px;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border);
+}
+.input-wrapper {
+    display: flex;
+    align-items: flex-end;
+    gap: 0;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 4px 4px 4px 18px;
+    transition: border-color var(--transition);
+}
+.input-wrapper { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.input-wrapper:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108, 123, 240, 0.15);
+}
+.input-wrapper textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    line-height: 1.5;
+    resize: none;
+    max-height: 96px;
+    padding: 8px 0;
+}
+.input-wrapper textarea::placeholder { color: var(--text-muted); }
+
+.send-btn {
+    width: 40px; height: 40px;
+    background: var(--accent);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition), opacity var(--transition);
+    flex-shrink: 0;
+}
+.send-btn:hover { background: var(--accent-hover); transform: scale(1.05); }
+.send-btn:active { transform: scale(0.95); }
+.send-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+.send-btn svg { width: 18px; height: 18px; }
+
+/* ---- Stats panel ---- */
+.stats-list { padding: 0 14px; }
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 4px;
+    border-bottom: 1px solid var(--border);
+}
+.stat-row:last-child { border-bottom: none; }
+.stat-icon {
+    width: 28px; height: 28px;
+    background: var(--bg-card);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.stat-icon svg { width: 14px; height: 14px; stroke: var(--text-muted); }
+.stat-body { flex: 1; }
+.stat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.stat-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 1px;
+}
+.stat-warn {
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 12px 14px;
+    font-size: 11px;
+    color: var(--warning);
+    line-height: 1.45;
+}
+.refresh-btn {
+    display: block;
+    margin: 12px 14px;
+    padding: 8px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+    text-align: center;
+}
+.refresh-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+/* ---- Animations ---- */
+@keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-8px); }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes checkPop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+.upload-success-icon { animation: checkPop 0.4s ease-out; display: inline-block; }
+
+/* ---- Mobile ---- */
+.mobile-toggle {
+    display: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+.mobile-toggle svg { width: 18px; height: 18px; }
+
+@media (max-width: 1024px) { .panel-right { display: none; } }
+@media (max-width: 768px) {
+    .panel-left { display: none; }
+    .panel-left.open { display: flex; position: absolute; z-index: 100; top: 52px; left: 0; bottom: 0; width: 280px; }
+    .mobile-toggle { display: flex; }
+    .header-pills { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="mobile-toggle" id="mobile-toggle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            </button>
+            <div class="header-logo" title="Multilingual RAG — Hindi/English">
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="32" height="32" rx="8" fill="#6c7bf0"/>
+                    <text x="8" y="17" font-size="11" fill="white" font-weight="700" font-family="-apple-system, system-ui, sans-serif">अ</text>
+                    <text x="20" y="17" font-size="11" fill="white" font-weight="700" font-family="-apple-system, system-ui, sans-serif">A</text>
+                    <path d="M8 23 h20 M8 27 h14" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.65"/>
+                </svg>
+            </div>
+            <span class="header-title">Multilingual RAG</span>
+        </div>
+        <div class="header-pills">
+            <span>BGE-M3</span>
+            <span>FAISS</span>
+            <span>OpenRouter / DeepSeek</span>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <div class="main">
+        <!-- Left: Sources -->
+        <aside class="panel panel-left" id="sources-panel">
+            <div class="panel-header">Sources</div>
+            <button class="add-sources-btn" id="add-sources-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                Add sources
+            </button>
+            <input type="file" id="file-input" multiple accept=".pdf,.txt,.md,.html,.htm">
+            <div class="source-list" id="source-list">
+                <div class="source-empty">
+                    <div class="source-empty-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.4"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+                    </div>
+                    <div>Upload PDFs, TXT, or MD files<br>to get started.</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center: Chat -->
+        <main class="panel panel-center">
+            <div class="chat-container">
+                <div class="messages" id="messages">
+                    <div class="welcome" id="welcome">
+                        <div class="welcome-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                        </div>
+                        <div class="welcome-title">Ask about your documents</div>
+                        <div class="welcome-sub">Upload documents and ask questions in Hindi, English, or Hinglish. Cross-lingual retrieval finds relevant content regardless of language.</div>
+                        <div class="welcome-chips" id="welcome-chips">
+                            <button class="chip">&#2349;&#2366;&#2352;&#2340; &#2325;&#2368; &#2352;&#2366;&#2332;&#2343;&#2366;&#2344;&#2368; &#2325;&#2381;&#2351;&#2366; &#2361;&#2376;?</button>
+                            <button class="chip">Tell me about the Taj Mahal</button>
+                            <button class="chip">ISRO ke baare mein batao</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input -->
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <textarea id="chat-input" rows="1" placeholder="Ask about your documents..."></textarea>
+                        <button class="send-btn" id="send-btn" title="Send message">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right: Stats -->
+        <aside class="panel panel-right">
+            <div class="panel-header">System Info</div>
+            <div class="stats-list" id="stats-list">
+                <div class="stat-row">
+                    <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div>
+                    <div class="stat-body"><div class="stat-label">Documents</div><div class="stat-value" id="stat-docs">0</div></div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+                    <div class="stat-body"><div class="stat-label">Embeddings</div><div class="stat-value" id="stat-emb">BGE-M3</div></div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a4 4 0 014 4c0 2-2 3-2 5h-4c0-2-2-3-2-5a4 4 0 014-4z"/><path d="M10 17h4M11 21h2"/></svg></div>
+                    <div class="stat-body"><div class="stat-label">LLM Provider</div><div class="stat-value" id="stat-llm">Not configured</div></div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 7h8M8 11h5"/></svg></div>
+                    <div class="stat-body"><div class="stat-label">Index Type</div><div class="stat-value" id="stat-index">flat</div></div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+                    <div class="stat-body"><div class="stat-label">Languages</div><div class="stat-value" id="stat-langs">none</div></div>
+                </div>
+            </div>
+            <div class="stat-warn" id="stat-warn">Click Refresh to load live stats.</div>
+            <button class="refresh-btn" id="refresh-btn">Refresh</button>
+        </aside>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// Backend URL — auto-detect
+// ============================================================
+const API_BASE = window.location.port === '7860'
+    ? 'http://localhost:8000'
+    : '';
+
+let isStreaming = false;
+
+// ---- Helpers ----
+function $(sel) { return document.querySelector(sel); }
+
+function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+}
+
+function renderMarkdown(text) {
+    if (!text) return '';
+    let h = escapeHtml(text);
+    h = h.replace(/```(\w*)\n([\s\S]*?)```/g, (_, l, c) => '<pre><code>' + c.trim() + '</code></pre>');
+    h = h.replace(/`([^`]+)`/g, '<code>$1</code>');
+    h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    h = h.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    h = h.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    h = h.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    h = h.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+    h = h.replace(/^\- (.+)$/gm, '<li>$1</li>');
+    h = h.replace(/\n\n/g, '</p><p>');
+    h = h.replace(/\n/g, '<br>');
+    h = '<p>' + h + '</p>';
+    h = h.replace(/<p><\/p>/g, '');
+    h = h.replace(/<p>(<h[123]>)/g, '$1');
+    h = h.replace(/(<\/h[123]>)<\/p>/g, '$1');
+    h = h.replace(/<p>(<pre>)/g, '$1');
+    h = h.replace(/(<\/pre>)<\/p>/g, '$1');
+    return h;
+}
+
+function detectLang(text) {
+    let dev = 0, lat = 0;
+    for (const c of text) {
+        const code = c.charCodeAt(0);
+        if (code >= 0x0900 && code <= 0x097F) dev++;
+        else if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122)) lat++;
+    }
+    const total = dev + lat;
+    if (total === 0) return '';
+    if (dev / total > 0.5) return 'hi';
+    if (lat / total > 0.8) return 'en';
+    return 'mix';
+}
+
+function langLabel(l) { return {hi:'Hindi', en:'English', mix:'Hinglish'}[l] || ''; }
+
+function scrollBottom() { const m = $('#messages'); m.scrollTop = m.scrollHeight; }
+
+// ---- Textarea auto-grow ----
+function autoGrow(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 96) + 'px';
+}
+
+// ---- Send message ----
+async function sendMessage() {
+    const input = $('#chat-input');
+    const query = input.value.trim();
+    if (!query || isStreaming) return;
+
+    // Remove welcome
+    const w = $('#welcome');
+    if (w) w.remove();
+
+    // User message
+    const lang = detectLang(query);
+    appendMsg('user', escapeHtml(query), lang);
+
+    // Clear
+    input.value = '';
+    input.style.height = 'auto';
+
+    // Typing
+    const typing = appendTyping();
+    isStreaming = true;
+    $('#send-btn').disabled = true;
+
+    let answer = '';
+    let sources = [];
+    let rLang = lang;
+
+    try {
+        const resp = await fetch(API_BASE + '/query', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({query, top_k: 5})
+        });
+
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+        const reader = resp.body.getReader();
+        const dec = new TextDecoder();
+        let buf = '', evt = '';
+
+        // Lazily create the assistant bubble on first token so the typing
+        // dots stay visible during retrieval/LLM-thinking time. Replacing
+        // them with an empty bubble looked like a stutter.
+        let msgEl = null, bubble = null, textNode = null, cursor = null;
+        const ensureBubble = () => {
+            if (msgEl) return;
+            typing.remove();
+            msgEl = appendMsg('assistant', '', rLang);
+            bubble = msgEl.querySelector('.bubble');
+            // Plain text node + blinking cursor while streaming. Markdown
+            // is rendered ONCE at the end — re-rendering every token reset
+            // any in-progress CSS animations and caused visible flicker.
+            textNode = document.createTextNode('');
+            cursor = document.createElement('span');
+            cursor.className = 'stream-cursor';
+            bubble.appendChild(textNode);
+            bubble.appendChild(cursor);
+        };
+
+        while (true) {
+            const {done, value} = await reader.read();
+            if (done) break;
+            buf += dec.decode(value, {stream: true});
+            const lines = buf.split('\n');
+            buf = lines.pop();
+
+            for (const line of lines) {
+                if (line.startsWith('event:')) {
+                    evt = line.slice(6).trim();
+                } else if (line.startsWith('data:')) {
+                    const d = line.slice(5).trim();
+                    if (evt === 'sources') {
+                        try {
+                            sources = JSON.parse(d);
+                            if (sources[0] && sources[0].language) {
+                                rLang = sources[0].language === 'hi' ? 'hi' : sources[0].language === 'en' ? 'en' : 'mix';
+                            }
+                        } catch(e) {}
+                    } else if (evt === 'token') {
+                        ensureBubble();
+                        answer += d;
+                        textNode.nodeValue = answer;
+                        scrollBottom();
+                    } else if (evt === 'error') {
+                        ensureBubble();
+                        answer += (answer ? '\n\n' : '') + '*' + d + '*';
+                        textNode.nodeValue = answer;
+                    }
+                }
+            }
+        }
+
+        if (!msgEl) {
+            // No tokens at all — show a placeholder.
+            typing.remove();
+            msgEl = appendMsg('assistant', '', rLang);
+            bubble = msgEl.querySelector('.bubble');
+        }
+        // Stream complete — render markdown once and drop the cursor.
+        bubble.innerHTML = renderMarkdown(answer || '*No response received.*');
+
+        // Update lang badge
+        const badge = msgEl.querySelector('.lang-badge');
+        if (badge && rLang) {
+            badge.className = 'lang-badge lang-' + rLang;
+            badge.textContent = langLabel(rLang);
+        }
+
+        if (sources.length) addSources(msgEl, sources);
+
+    } catch (err) {
+        typing.remove();
+        appendMsg('assistant', '<em>Could not connect to backend. Is the server running?</em>', '', true);
+    }
+
+    isStreaming = false;
+    $('#send-btn').disabled = false;
+    input.focus();
+    scrollBottom();
+}
+
+function appendMsg(role, content, lang, raw) {
+    const el = document.createElement('div');
+    el.className = 'message ' + role;
+    let badge = '';
+    if (role === 'assistant' && lang) {
+        badge = '<span class="lang-badge lang-' + lang + '">' + langLabel(lang) + '</span>';
+    }
+    el.innerHTML = badge + '<div class="bubble">' + (content || '') + '</div>';
+    $('#messages').appendChild(el);
+    scrollBottom();
+    return el;
+}
+
+function appendTyping() {
+    const el = document.createElement('div');
+    el.className = 'message assistant';
+    el.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+    $('#messages').appendChild(el);
+    scrollBottom();
+    return el;
+}
+
+function addSources(msgEl, sources) {
+    const btn = document.createElement('button');
+    btn.className = 'sources-toggle';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"/><path d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg> ' + sources.length + ' source' + (sources.length > 1 ? 's' : '');
+
+    const panel = document.createElement('div');
+    panel.className = 'sources-panel';
+    let html = '';
+    for (const s of sources) {
+        const score = s.score || 0;
+        const pct = Math.round(score * 100);
+        const cls = score >= 0.6 ? 'high' : score >= 0.35 ? 'mid' : 'low';
+        const name = escapeHtml(s.source || s.title || 'Passage ' + (s.rank || '?'));
+        const txt = (s.text || '').slice(0, 150).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,' ');
+        html += '<div class="source-result"><div class="source-result-head"><span class="source-result-file">' + name + '</span><span class="score-pill ' + cls + '">' + pct + '%</span></div><div class="source-result-text">' + txt + (s.text && s.text.length > 150 ? '...' : '') + '</div></div>';
+    }
+    panel.innerHTML = html;
+    btn.onclick = () => panel.classList.toggle('open');
+    msgEl.appendChild(btn);
+    msgEl.appendChild(panel);
+}
+
+// ---- File upload ----
+async function handleFiles(files) {
+    if (!files || !files.length) return;
+    const list = $('#source-list');
+    const empty = list.querySelector('.source-empty');
+    if (empty) empty.remove();
+
+    for (const file of files) {
+        const card = document.createElement('div');
+        card.className = 'source-card';
+        card.innerHTML = '<div class="source-card-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>' + escapeHtml(file.name) + '</div><div class="source-card-loading">Indexing<span class="spinner"></span></div>';
+        list.appendChild(card);
+
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            const resp = await fetch(API_BASE + '/ingest', { method: 'POST', body: fd });
+            const meta = card.querySelector('.source-card-loading');
+            if (resp.ok) {
+                const data = await resp.json();
+                meta.className = 'source-card-meta';
+                meta.innerHTML = '<span class="upload-success-icon">\u2713</span> ' + (data.chunks || 0) + ' chunks indexed';
+            } else {
+                meta.className = 'source-card-error';
+                meta.textContent = 'Error ' + resp.status;
+            }
+        } catch (err) {
+            const meta = card.querySelector('.source-card-loading');
+            meta.className = 'source-card-error';
+            meta.textContent = 'Connection failed';
+        }
+    }
+}
+
+// ---- Stats ----
+async function refreshStats() {
+    try {
+        const [hR, sR] = await Promise.all([
+            fetch(API_BASE + '/health'),
+            fetch(API_BASE + '/stats')
+        ]);
+        const health = hR.ok ? await hR.json() : {};
+        const stats = sR.ok ? await sR.json() : {};
+
+        $('#stat-docs').textContent = (stats.index_size || 0).toLocaleString();
+        const emb = stats.embedding_model || 'unknown';
+        const dim = stats.embedding_dim || 0;
+        $('#stat-emb').textContent = dim ? emb + ' (' + dim + 'd)' : emb;
+        const llm = health.llm_provider || '';
+        $('#stat-llm').textContent = llm || 'Not configured';
+        $('#stat-index').textContent = stats.faiss_index_type || 'flat';
+        $('#stat-langs').textContent = (stats.languages || []).join(', ') || 'none';
+
+        const warn = $('#stat-warn');
+        if (llm) {
+            warn.textContent = 'Provider: ' + llm;
+            warn.style.borderColor = 'rgba(74,222,128,0.2)';
+            warn.style.background = 'rgba(74,222,128,0.05)';
+            warn.style.color = '#4ade80';
+        } else {
+            warn.textContent = 'Set GEMINI_API_KEY or OPENAI_API_KEY in .env to enable answers.';
+            warn.style.borderColor = '';
+            warn.style.background = '';
+            warn.style.color = '';
+        }
+    } catch (e) {
+        $('#stat-warn').textContent = 'Could not connect to backend.';
+    }
+}
+
+// ---- Wire events ----
+document.addEventListener('DOMContentLoaded', function() {
+    const input = $('#chat-input');
+    const sendBtn = $('#send-btn');
+    const fileInput = $('#file-input');
+    const addBtn = $('#add-sources-btn');
+    const refreshBtn = $('#refresh-btn');
+    const mobileToggle = $('#mobile-toggle');
+
+    // Send
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+    input.addEventListener('input', function() { autoGrow(this); });
+
+    // File upload
+    addBtn.addEventListener('click', function() { fileInput.click(); });
+    fileInput.addEventListener('change', function(e) {
+        handleFiles(e.target.files);
+        e.target.value = '';
+    });
+
+    // Stats
+    refreshBtn.addEventListener('click', refreshStats);
+
+    // Mobile
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', function() {
+            $('#sources-panel').classList.toggle('open');
+        });
+    }
+
+    // Example chips
+    document.querySelectorAll('.chip').forEach(function(chip) {
+        chip.addEventListener('click', function() {
+            input.value = this.textContent;
+            autoGrow(input);
+            sendMessage();
+        });
+    });
+
+    input.focus();
+});
+</script>
+</body>
+</html>

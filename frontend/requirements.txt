@@ -1,0 +1,2 @@
+# No external dependencies — frontend uses Python stdlib only.
+# This file exists for Docker compatibility.

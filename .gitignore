@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Testing
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Data — generated artifacts (gitkeep preserves dirs)
+backend/data/models/*
+!backend/data/models/.gitkeep
+backend/data/index/
+backend/data/sample_corpus/*
+!backend/data/sample_corpus/.gitkeep
+backend/data/benchmark/*
+!backend/data/benchmark/.gitkeep
+
+# Embedding caches
+*.faiss
+*.npy
+*.pkl
+
+# Eval outputs
+eval_results/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+.claude/settings.local.json
+*.swp
+*.swo
+
+# Scratch
+temp/
+
+# uv
+.uv-cache/
+uv.lock
+
+# Gradio
+flagged/
+gradio_cached_examples/
+
+# Docker
+*.tar
