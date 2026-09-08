@@ -61,7 +61,7 @@ The stream can emit these event types:
 | `token` | One generated text chunk |
 | `citations` | JSON array of cited source ranks |
 | `error` | Error message string |
-| `done` | Empty completion marker |
+| `done` | JSON with `elapsed_ms` (total query time in milliseconds) |
 
 If no documents are indexed, the backend skips retrieval and uses the configured
 LLM as a direct chat model. If documents are indexed but retrieval finds no
@@ -75,3 +75,18 @@ relevant passages, the backend streams a fallback answer without citations.
   for Gemini.
 - Run `bash scripts/download_models.sh` before retrieval so the fastText
   language-ID model is available.
+
+## Response Headers
+
+All responses include:
+
+| Header | Description |
+|---|---|
+| `X-Response-Time` | Server-side processing time (e.g. `42.3ms`) |
+| `Content-Encoding: gzip` | Automatic for responses > 500 bytes |
+
+## Performance Notes
+
+- Query embeddings are cached in an LRU cache (128 entries). Repeated queries skip the embedding model entirely.
+- Vector store search uses a single batched SQLite `WHERE IN` query instead of individual lookups per FAISS result.
+- Gemini streaming uses `asyncio.Queue` for zero-latency chunk delivery (no polling).

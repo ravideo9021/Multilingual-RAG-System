@@ -1,6 +1,6 @@
 # Multilingual RAG System — Hindi-English Cross-Lingual Retrieval
 
-A production-grade Retrieval-Augmented Generation system that handles queries in Hindi, English, or code-switched Hinglish. Cross-lingual retrieval lets a Hindi question surface relevant English documents, and vice versa. The app ships with a FastAPI backend, FAISS-backed retrieval, streaming generation, and a lightweight standalone HTML/JS frontend.
+A production-grade Retrieval-Augmented Generation system that handles queries in Hindi, English, or code-switched Hinglish. Cross-lingual retrieval lets a Hindi question surface relevant English documents, and vice versa. The app ships with a FastAPI backend, FAISS-backed retrieval, streaming generation, and a polished standalone HTML/JS frontend with dark glass-morphism UI, AI thinking animations, and real-time streaming.
 
 ## Features
 
@@ -16,7 +16,11 @@ A production-grade Retrieval-Augmented Generation system that handles queries in
 - [x] Streaming LLM generation through OpenAI-compatible providers, OpenRouter, or Gemini
 - [x] LLM-backed translation for Hinglish dual-query strategy
 - [x] FastAPI backend with SSE streaming
-- [x] Standalone HTML/JS frontend with upload, chat, stats, citations, and SSE streaming
+- [x] Standalone HTML/JS frontend with dark glass-morphism UI, AI thinking animation, streaming cursor, and source chips
+- [x] LRU query embedding cache (128 entries, SHA-256 keyed)
+- [x] GZip response compression and request timing middleware
+- [x] Zero-latency Gemini streaming via asyncio.Queue (replaced polling)
+- [x] Batched SQLite metadata lookups in vector store search
 - [x] Cross-lingual benchmark framework (MIRACL-hi + XOR-TyDi)
 - [x] Embedding model comparison (BGE-M3 vs multilingual-e5 vs OpenAI)
 - [ ] RAGAS evaluation (framework ready, requires running with API keys)
@@ -169,6 +173,8 @@ The backend exposes a compact HTTP API:
 | `POST` | `/ingest` | Upload `.txt`, `.md`, `.html`, or `.pdf` content for chunking and indexing |
 | `POST` | `/query` | SSE-streamed RAG answer with `sources`, `token`, `citations`, `error`, and `done` events |
 
+All responses include an `X-Response-Time` header. Responses over 500 bytes are GZip-compressed automatically. The `done` SSE event includes `elapsed_ms` for client-side latency display.
+
 See [docs/API.md](docs/API.md) for request examples and the SSE event contract.
 
 ## Evaluation Results
@@ -274,6 +280,31 @@ multilingual-rag/
 ├── LICENSE                              # MIT
 └── README.md
 ```
+
+## Performance (v0.2.0)
+
+| Optimization | Impact |
+|---|---|
+| Batched SQLite lookups | Single `WHERE IN` query replaces N individual queries during FAISS search |
+| asyncio.Queue Gemini streaming | Eliminates 50ms-per-chunk polling latency; zero-delay token delivery |
+| GZip middleware | Compresses responses > 500 bytes (sources, stats payloads) |
+| LRU embedding cache | Skips re-encoding for repeated queries (128-entry SHA-256 keyed cache) |
+| `X-Response-Time` header | Server-side timing on every response for observability |
+| `elapsed_ms` in SSE `done` | End-to-end query latency surfaced in the UI |
+
+## Deployment
+
+The project can be deployed to any platform that supports Python or Docker:
+
+| Platform | How |
+|---|---|
+| **Railway** | Connect GitHub repo, set env vars, auto-deploys on push |
+| **Render** | Free tier web service, build: `pip install -e backend/`, start: `uvicorn app.main:app` |
+| **Fly.io** | `fly launch` with the existing Dockerfile |
+| **Google Cloud Run** | Build Docker image, push to Artifact Registry, deploy as serverless |
+| **Hugging Face Spaces** | Docker-based Space running both backend and frontend |
+
+Set `GEMINI_API_KEY` or `OPENAI_API_KEY` as environment variables on your chosen platform.
 
 ## Screenshots
 

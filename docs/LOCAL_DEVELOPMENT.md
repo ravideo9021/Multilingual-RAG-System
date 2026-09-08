@@ -111,3 +111,15 @@ benchmark corpus, runs embedding comparisons, and updates `REPORT.md`.
 | Generation is unavailable | Confirm `.env` contains a valid `OPENAI_API_KEY` or `GEMINI_API_KEY` |
 | Language detection fails at startup | Run `bash scripts/download_models.sh` and confirm `backend/data/models/lid.176.bin` exists |
 | Slow first request | BGE-M3, tokenizer, FAISS, and fastText load lazily or warm up during startup |
+| Repeated queries still slow | Embedding cache (128 entries) eliminates re-encoding; restart the server to clear it |
+
+## Performance (v0.2.0)
+
+The backend includes several optimizations enabled by default:
+
+- **GZip compression** — responses > 500 bytes are compressed automatically
+- **Response timing** — every response includes an `X-Response-Time` header
+- **Batched metadata lookups** — vector store search uses a single SQL query instead of per-result lookups
+- **Embedding cache** — an LRU cache (128 entries) skips the embedding model for repeated queries
+- **Zero-latency streaming** — Gemini provider uses `asyncio.Queue` instead of polling for instant token delivery
+- **Elapsed time** — the SSE `done` event includes `elapsed_ms` so the frontend can display query latency

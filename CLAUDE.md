@@ -1,11 +1,11 @@
 # CLAUDE.md — Multilingual RAG System
 
 ## Project overview
-Production-grade Hindi-English cross-lingual RAG system. Three-column single-page UI (Sources | Chat | Stats). Backend: FastAPI + FAISS + BGE-M3. Frontend: standalone HTML/JS served by Python HTTP server. LLM: Gemini primary, OpenAI fallback.
+Production-grade Hindi-English cross-lingual RAG system. Three-column single-page UI (Sources | Chat | Stats) with dark glass-morphism theme, AI thinking animation, and streaming cursor. Backend: FastAPI + FAISS + BGE-M3 with GZip compression, LRU embedding cache, batched SQLite lookups, and zero-latency Gemini streaming. Frontend: standalone HTML/JS served by Python HTTP server. LLM: Gemini primary, OpenAI fallback. Version 0.2.0.
 
 ## Commands
 - `make install` — Install deps via uv
-- `make test` — Run tests (276 pass, 5 skip). Uses KMP_DUPLICATE_LIB_OK=TRUE for macOS torch/faiss.
+- `make test` — Run tests (277 pass, 3 skip). Uses KMP_DUPLICATE_LIB_OK=TRUE for macOS torch/faiss.
 - `make run` — Start backend at :8000
 - `make frontend` — Start frontend HTTP server at :7860 (backend must be running first)
 - `make docker-up` / `make docker-down` — Docker compose
@@ -31,12 +31,20 @@ multilingual-rag/
 ## Key constraints
 - Two servers required: backend (:8000) must be running before frontend (:7860) works
 - Frontend makes cross-origin fetch() calls to backend — CORS is configured in backend/app/main.py
-- No API calls on page load — stats load on button click only
+- Stats auto-refresh on page load via /health and /stats
 - LLM keys optional — system works for retrieval without them, shows graceful error for generation
 - Tests mock all LLM calls — zero real API calls in pytest
 - BGE-M3 smoke tests gated behind RUN_SLOW_TESTS=1
 - IVF-PQ tests skipped on macOS (torch/faiss OpenMP conflict)
-- FAISS SIGABRT when all 276 tests run in single process on macOS — run in batches
+- FAISS SIGABRT when all 277 tests run in single process on macOS — run in batches
+
+## Performance optimizations (v0.2.0)
+- GZip compression middleware (minimum_size=500) in main.py
+- X-Response-Time header on all responses
+- Batched SQLite WHERE IN query in vector_store.py search()
+- asyncio.Queue replaces polling in gemini_provider.py stream()
+- LRU embedding cache (128 entries) in retriever.py
+- SSE done event carries elapsed_ms for frontend latency display
 
 ## Tech versions (pinned in pyproject.toml)
 torch==2.4.1, sentence-transformers==3.2.1, faiss-cpu==1.8.0.post1, fastapi==0.115.4, google-generativeai==0.8.3, openai==1.54.4
