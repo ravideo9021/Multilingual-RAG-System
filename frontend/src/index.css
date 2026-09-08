@@ -4,56 +4,48 @@
 
 @layer base {
   :root {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 5%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
+    --background: 0 0% 3.5%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 6.5%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 5.5%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 0 0% 96%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 96%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --radius: 0.75rem;
-    --radius-control: 8px;
-    --warm: 24 95% 53%;
-    --notch-bg: 0 0% 4%;
+    --destructive-foreground: 0 0% 96%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 0 0% 30%;
+    --radius: 1.25rem;
+    --accent-glow: 30 80% 55%;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body, #root { height: 100%; overflow: hidden; }
-  body { background: hsl(var(--background)); color: hsl(var(--foreground)); }
+  body {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 10px; }
-  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.3); }
-}
-
-/* Grid background */
-.grid-bg {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.3;
-  background-image:
-    linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
-  background-size: 32px 32px;
-  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  ::-webkit-scrollbar-thumb:hover { background: hsl(0 0% 20%); }
 }
 
 /* Stream cursor */
 .stream-cursor {
-  display: inline-block; width: 2px; height: 1em;
-  margin-left: 2px; border-radius: 1px; vertical-align: text-bottom;
+  display: inline-block; width: 2px; height: 1.1em;
+  margin-left: 3px; border-radius: 1px; vertical-align: text-bottom;
   background: hsl(var(--foreground));
   animation: cursor-blink 1.2s ease-in-out infinite;
 }
@@ -61,49 +53,54 @@
 /* Source chip inline */
 .source-chip {
   display: inline-flex; align-items: center; gap: 3px;
-  background: hsl(var(--muted)); border: 1px solid hsl(var(--border));
-  color: hsl(var(--muted-foreground)); padding: 1px 6px;
-  border-radius: 5px; font-family: var(--font-mono, monospace);
+  background: hsl(var(--secondary)); border: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground)); padding: 2px 8px;
+  border-radius: 8px; font-family: var(--font-mono, monospace);
   font-size: 10.5px; font-weight: 600; cursor: pointer;
-  transition: all 0.15s ease; vertical-align: middle; margin: 0 1px;
+  transition: all 0.2s ease; vertical-align: middle; margin: 0 2px;
 }
 .source-chip:hover { background: hsl(var(--accent)); color: hsl(var(--foreground)); }
 
 /* Markdown in bubble-content */
 .bubble-content h1, .bubble-content h2, .bubble-content h3 {
-  margin: 12px 0 6px; font-weight: 600; letter-spacing: -0.01em;
+  margin: 14px 0 8px; font-weight: 600; letter-spacing: -0.01em;
 }
-.bubble-content h1 { font-size: 16px; }
-.bubble-content h2 { font-size: 15px; }
-.bubble-content h3 { font-size: 14px; }
-.bubble-content p { margin: 6px 0; }
-.bubble-content ul, .bubble-content ol { margin: 6px 0; padding-left: 20px; }
-.bubble-content li { margin: 3px 0; }
+.bubble-content h1 { font-size: 17px; }
+.bubble-content h2 { font-size: 16px; }
+.bubble-content h3 { font-size: 15px; }
+.bubble-content p { margin: 8px 0; }
+.bubble-content ul, .bubble-content ol { margin: 8px 0; padding-left: 20px; }
+.bubble-content li { margin: 4px 0; }
 .bubble-content code {
-  background: hsl(var(--muted)); padding: 2px 6px; border-radius: 5px;
-  font-family: var(--font-mono, monospace); font-size: 12px;
+  background: hsl(var(--secondary)); padding: 2px 7px; border-radius: 6px;
+  font-family: var(--font-mono, monospace); font-size: 12.5px;
 }
 .bubble-content pre {
   background: hsl(var(--background)); border: 1px solid hsl(var(--border));
-  border-radius: 10px; padding: 14px 16px; margin: 10px 0; overflow-x: auto;
+  border-radius: 16px; padding: 16px 20px; margin: 12px 0; overflow-x: auto;
 }
-.bubble-content pre code { background: none; padding: 0; font-size: 11.5px; line-height: 1.65; }
+.bubble-content pre code { background: none; padding: 0; font-size: 12px; line-height: 1.7; }
 .bubble-content strong { font-weight: 600; color: hsl(var(--foreground)); }
 .bubble-content em { font-style: italic; color: hsl(var(--muted-foreground)); }
 
 /* Shimmer overlay */
 .shimmer-overlay {
-  background: linear-gradient(110deg, transparent 35%, hsl(var(--foreground) / 0.04) 50%, transparent 75%);
+  background: linear-gradient(110deg, transparent 35%, hsl(var(--foreground) / 0.03) 50%, transparent 75%);
   background-size: 200% 100%;
-  animation: shimmer 5s linear infinite;
+  animation: shimmer 6s linear infinite;
 }
 
 /* Think scroll animation */
 .think-scroll {
-  animation: think-scroll 12s linear infinite;
+  animation: think-scroll 14s linear infinite;
 }
 
 @keyframes think-scroll {
   0% { transform: translateY(0); }
   100% { transform: translateY(-50%); }
+}
+
+/* Sera-style smooth transition utility */
+.sera-transition {
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }

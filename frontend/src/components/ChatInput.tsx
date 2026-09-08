@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Paperclip, Mic, ArrowUp, Sparkles } from 'lucide-react'
-import { cn, springBouncy } from '@/lib/utils'
+import { Paperclip, ArrowUp, Sparkles } from 'lucide-react'
+import { cn, ease } from '@/lib/utils'
 import type { EffortLevel } from '@/types'
 
 const EFFORT_LABELS = ['Concise', 'Balanced', 'Detailed'] as const
@@ -16,7 +16,6 @@ interface ChatInputProps {
 export function ChatInput({ onSend, onAttach, disabled, modelName }: ChatInputProps) {
   const [text, setText] = useState('')
   const [effort, setEffort] = useState<EffortLevel>(2)
-  const [isRecording, setIsRecording] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const handleSend = () => {
@@ -50,29 +49,28 @@ export function ChatInput({ onSend, onAttach, disabled, modelName }: ChatInputPr
   }
 
   return (
-    <div className="px-6 pb-4 pt-2" style={{ background: 'linear-gradient(to top, hsl(var(--background)) 60%, transparent)' }}>
+    <div className="px-5 pb-5 pt-2" style={{ background: 'linear-gradient(to top, hsl(var(--background)) 60%, transparent)' }}>
       <motion.div
         layout
         className={cn(
-          'max-w-[720px] mx-auto rounded-2xl px-4 pt-2.5 pb-2 transition-shadow',
+          'max-w-[720px] mx-auto rounded-2xl px-5 pt-3 pb-3 sera-transition',
           'bg-card border border-border',
-          'focus-within:border-foreground/20 focus-within:shadow-[0_0_0_2px_hsl(var(--ring)/0.08)]'
+          'focus-within:border-foreground/15 focus-within:shadow-[0_0_0_3px_hsl(var(--ring)/0.06)]'
         )}
       >
-        <div className="flex items-center gap-1.5 mb-1.5 px-0.5">
-          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary border border-border font-mono text-[10px] font-semibold text-muted-foreground tracking-wide">
-            <Sparkles size={10} className="text-warm opacity-70" />
+        <div className="flex items-center gap-2 mb-2">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary border border-border text-[11px] font-medium text-muted-foreground">
+            <Sparkles size={11} className="text-accent-glow opacity-70" />
             <span>{modelName}</span>
           </div>
 
           <motion.button
             whileTap={{ scale: 0.95 }}
-            transition={springBouncy}
             onClick={cycleEffort}
             className={cn(
-              'inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-mono text-[10px] font-medium cursor-pointer transition-colors',
+              'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium cursor-pointer sera-transition',
               effort === 2
-                ? 'text-warm border-warm/20 bg-secondary'
+                ? 'text-accent-glow border-accent-glow/20 bg-secondary'
                 : 'text-muted-foreground border-border bg-secondary hover:text-foreground'
             )}
           >
@@ -88,37 +86,33 @@ export function ChatInput({ onSend, onAttach, disabled, modelName }: ChatInputPr
           onKeyDown={handleKeyDown}
           rows={1}
           placeholder="Ask anything in Hindi, English, or Hinglish..."
-          className="w-full bg-transparent border-none outline-none text-foreground text-sm leading-relaxed resize-none max-h-[140px] min-h-[24px] px-1 py-0 placeholder:text-muted-foreground/40"
+          className="w-full bg-transparent border-none outline-none text-foreground text-[15px] leading-relaxed resize-none max-h-[140px] min-h-[28px] px-0.5 py-0 placeholder:text-muted-foreground/30"
         />
 
-        <div className="flex items-center justify-between mt-1.5 px-0.5">
-          <div className="flex items-center gap-0.5">
-            <InputIconButton onClick={onAttach} tooltip="Attach file">
-              <Paperclip size={16} />
-            </InputIconButton>
-            <InputIconButton
-              onClick={() => setIsRecording(!isRecording)}
-              tooltip="Voice input"
-              active={isRecording}
-            >
-              <Mic size={16} />
-            </InputIconButton>
-          </div>
+        <div className="flex items-center justify-between mt-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onAttach}
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground sera-transition cursor-pointer"
+          >
+            <Paperclip size={17} />
+          </motion.button>
 
           <motion.button
-            whileHover={!disabled ? { scale: 1.06 } : undefined}
-            whileTap={!disabled ? { scale: 0.94 } : undefined}
-            transition={springBouncy}
+            whileHover={!disabled ? { scale: 1.05 } : undefined}
+            whileTap={!disabled ? { scale: 0.95 } : undefined}
+            transition={{ duration: 0.2, ease }}
             onClick={handleSend}
             disabled={disabled || !text.trim()}
             className={cn(
-              'w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all',
+              'w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer sera-transition',
               disabled || !text.trim()
-                ? 'bg-muted opacity-30 cursor-not-allowed'
-                : 'bg-foreground text-background hover:bg-foreground/90'
+                ? 'bg-secondary opacity-30 cursor-not-allowed text-muted-foreground'
+                : 'bg-foreground text-background hover:opacity-90'
             )}
           >
-            <ArrowUp size={16} />
+            <ArrowUp size={17} />
           </motion.button>
         </div>
       </motion.div>
@@ -128,45 +122,15 @@ export function ChatInput({ onSend, onAttach, disabled, modelName }: ChatInputPr
 
 function DynamicBars({ level }: { level: number }) {
   return (
-    <div className="flex items-end gap-[1.5px] h-2.5">
+    <div className="flex items-end gap-[2px] h-3">
       {[4, 7, 10].map((h, i) => (
         <motion.span
           key={i}
-          animate={{ opacity: i <= level ? 1 : 0.25, height: h }}
-          transition={springBouncy}
+          animate={{ opacity: i <= level ? 1 : 0.2, height: h }}
+          transition={{ duration: 0.3, ease }}
           className="w-[2.5px] rounded-sm bg-current"
         />
       ))}
     </div>
-  )
-}
-
-function InputIconButton({
-  children,
-  onClick,
-  tooltip,
-  active,
-}: {
-  children: React.ReactNode
-  onClick: () => void
-  tooltip: string
-  active?: boolean
-}) {
-  return (
-    <motion.button
-      whileHover={{ scale: 1.08 }}
-      whileTap={{ scale: 0.92 }}
-      transition={springBouncy}
-      onClick={onClick}
-      title={tooltip}
-      className={cn(
-        'flex items-center justify-center w-7 h-7 rounded-md bg-transparent border-none cursor-pointer transition-colors',
-        active
-          ? 'text-red-400'
-          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-      )}
-    >
-      {children}
-    </motion.button>
   )
 }

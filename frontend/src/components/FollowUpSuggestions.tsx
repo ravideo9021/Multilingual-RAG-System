@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
-import { springBouncy } from '@/lib/utils'
+import { ease } from '@/lib/utils'
 
 interface FollowUpSuggestionsProps {
   query: string
@@ -23,23 +23,23 @@ export function FollowUpSuggestions({ query, onSelect }: FollowUpSuggestionsProp
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-wrap gap-1.5 mt-3"
+      transition={{ delay: 0.2, duration: 0.5, ease }}
+      className="flex flex-col sm:flex-row gap-2 mt-4"
     >
       {suggestions.map((s, i) => (
         <motion.button
           key={s}
-          initial={{ opacity: 0, y: 6 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 + i * 0.06, ...springBouncy }}
-          whileHover={{ y: -2, scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
+          transition={{ delay: 0.25 + i * 0.08, duration: 0.4, ease }}
+          whileHover={{ scale: 1.01, x: 2 }}
+          whileTap={{ scale: 0.99 }}
           onClick={() => onSelect(s)}
-          className="inline-flex items-center gap-1.5 px-3.5 py-[7px] rounded-full text-xs font-medium text-muted-foreground bg-card border border-border cursor-pointer transition-all hover:bg-secondary hover:border-foreground/10 hover:text-foreground"
+          className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl text-sm text-muted-foreground bg-card border border-border cursor-pointer sera-transition hover:bg-secondary hover:border-foreground/10 hover:text-foreground group"
         >
-          <ArrowRight size={12} className="opacity-40" />
+          <ArrowRight size={14} className="text-muted-foreground/20 group-hover:text-foreground/40 sera-transition shrink-0" />
           {s}
         </motion.button>
       ))}

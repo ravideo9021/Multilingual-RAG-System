@@ -198,84 +198,81 @@ export default function App() {
   const modelName = llmProvider.match(/\(([^)]+)\)/)?.[1] || llmProvider.split('(')[0]?.trim() || 'Gemini'
 
   return (
-    <>
-      <div className="grid-bg" />
+    <div className="flex flex-col h-screen relative">
+      <Header
+        embeddingModel={stats?.embedding_model || 'BGE-M3'}
+        llmProvider={llmProvider}
+        isLive={!!llmProvider}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        sidebarOpen={sidebarOpen}
+      />
 
-      <div className="flex flex-col h-screen relative z-[1]">
-        <Header
-          embeddingModel={stats?.embedding_model || 'BGE-M3'}
-          llmProvider={llmProvider}
-          isLive={!!llmProvider}
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        />
+      <div className="flex flex-1 min-h-0">
+        <aside className={`hidden md:flex w-[280px] min-w-[240px] bg-background border-r border-border/50 flex-col ${sidebarOpen ? '!flex fixed top-14 left-0 bottom-0 z-[100] w-[300px] bg-background shadow-2xl shadow-black/50' : ''}`}>
+          <SourcesPanel
+            files={files}
+            onUploadClick={() => fileInputRef.current?.click()}
+          />
+        </aside>
 
-        <div className="flex flex-1 min-h-0">
-          <aside className={`hidden md:flex w-[260px] min-w-[220px] bg-card border-r border-border flex-col ${sidebarOpen ? '!flex fixed top-12 left-0 bottom-0 z-[100] w-[280px] shadow-2xl' : ''}`}>
-            <SourcesPanel
-              files={files}
-              onUploadClick={() => fileInputRef.current?.click()}
-            />
-          </aside>
-
-          <main className="flex-1 min-w-0 flex flex-col">
-            <div className="flex-1 overflow-y-auto px-8 py-6 flex flex-col gap-6">
-              <AnimatePresence mode="wait">
-                {messages.length === 0 && !isThinking && (
-                  <Welcome
-                    key="welcome"
-                    onChipClick={handleSend}
-                  />
-                )}
-              </AnimatePresence>
-
-              {messages.map((msg, i) => (
-                <StreamingMessage
-                  key={msg.id}
-                  message={msg}
-                  originalQuery={msg.role === 'assistant' ? lastQueryRef.current : undefined}
-                  onRetry={msg.role === 'assistant' && !msg.isStreaming ? handleRetry : undefined}
-                  onFollowUp={msg.role === 'assistant' && !msg.isStreaming && i === messages.length - 1 ? handleFollowUp : undefined}
+        <main className="flex-1 min-w-0 flex flex-col">
+          <div className="flex-1 overflow-y-auto px-6 sm:px-10 py-8 flex flex-col gap-8">
+            <AnimatePresence mode="wait">
+              {messages.length === 0 && !isThinking && (
+                <Welcome
+                  key="welcome"
+                  onChipClick={handleSend}
                 />
-              ))}
+              )}
+            </AnimatePresence>
 
-              <AnimatePresence>
-                {isThinking && <ThinkingCard key="thinking" />}
-              </AnimatePresence>
+            {messages.map((msg, i) => (
+              <StreamingMessage
+                key={msg.id}
+                message={msg}
+                originalQuery={msg.role === 'assistant' ? lastQueryRef.current : undefined}
+                onRetry={msg.role === 'assistant' && !msg.isStreaming ? handleRetry : undefined}
+                onFollowUp={msg.role === 'assistant' && !msg.isStreaming && i === messages.length - 1 ? handleFollowUp : undefined}
+              />
+            ))}
 
-              <div ref={messagesEndRef} />
-            </div>
+            <AnimatePresence>
+              {isThinking && <ThinkingCard key="thinking" />}
+            </AnimatePresence>
 
-            <ChatInput
-              onSend={handleSend}
-              onAttach={() => fileInputRef.current?.click()}
-              disabled={isStreaming}
-              modelName={modelName}
-            />
-          </main>
+            <div ref={messagesEndRef} />
+          </div>
 
-          <aside className="hidden lg:flex w-[260px] min-w-[220px] bg-card border-l border-border flex-col">
-            <StatsPanel
-              stats={stats}
-              health={health}
-              loading={statsLoading}
-              error={statsError}
-              onRefresh={refreshStats}
-            />
-          </aside>
-        </div>
+          <ChatInput
+            onSend={handleSend}
+            onAttach={() => fileInputRef.current?.click()}
+            disabled={isStreaming}
+            modelName={modelName}
+          />
+        </main>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept=".pdf,.txt,.md,.html,.htm"
-          className="hidden"
-          onChange={e => {
-            handleFileUpload(e.target.files)
-            e.target.value = ''
-          }}
-        />
+        <aside className="hidden lg:flex w-[280px] min-w-[240px] bg-background border-l border-border/50 flex-col">
+          <StatsPanel
+            stats={stats}
+            health={health}
+            loading={statsLoading}
+            error={statsError}
+            onRefresh={refreshStats}
+          />
+        </aside>
       </div>
-    </>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept=".pdf,.txt,.md,.html,.htm"
+        className="hidden"
+        onChange={e => {
+          handleFileUpload(e.target.files)
+          e.target.value = ''
+        }}
+      />
+    </div>
   )
 }

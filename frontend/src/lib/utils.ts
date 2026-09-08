@@ -62,5 +62,6 @@ export function langLabel(l: string): string {
   return { hi: 'Hindi', en: 'English', mix: 'Hinglish' }[l] || ''
 }
 
-export const spring = { type: 'spring' as const, stiffness: 400, damping: 25 }
-export const springBouncy = { type: 'spring' as const, stiffness: 300, damping: 20, mass: 0.8 }
+export const ease = [0.25, 0.1, 0.25, 1] as const
+export const spring = { type: 'spring' as const, stiffness: 300, damping: 30 }
+export const springBouncy = { type: 'spring' as const, stiffness: 250, damping: 22, mass: 0.8 }
