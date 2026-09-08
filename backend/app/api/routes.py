@@ -35,16 +35,11 @@ router = APIRouter()
 
 
 def _llm_provider_display() -> str:
-    """Best-effort human-readable label for the configured LLM.
-
-    Mirrors the precedence in :mod:`app.generation.factory`: an OpenAI key
-    with a custom base_url is treated as "OpenRouter (...)"; raw OpenAI key
-    is "OpenAI (...)"; Gemini is "Gemini (...)". Empty string when nothing
-    is configured.
-    """
+    """Best-effort human-readable label for the configured LLM."""
+    if settings.llm_provider == "gemini" and settings.gemini_api_key:
+        return f"Gemini ({settings.gemini_main_model})"
     if settings.openai_api_key:
         if settings.openai_base_url and "openrouter" in settings.openai_base_url.lower():
-            # Show the provider family, e.g. "OpenRouter (deepseek)".
             family = settings.openai_main_model.split("/", 1)[0] or "model"
             return f"OpenRouter ({family})"
         return f"OpenAI ({settings.openai_main_model})"

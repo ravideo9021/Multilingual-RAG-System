@@ -78,8 +78,8 @@ class Settings(BaseSettings):
     # this transparently uses OpenRouter's free DeepSeek via the OpenAI SDK.
     # Leave ``openai_base_url`` unset to talk to OpenAI directly.
     llm_provider: Literal["gemini", "openai"] = "openai"
-    gemini_main_model: str = "gemini-2.5-pro"
-    gemini_cheap_model: str = "gemini-2.5-flash"
+    gemini_main_model: str = "gemini-3.6-flash"
+    gemini_cheap_model: str = "gemini-3.6-flash"
     openai_main_model: str = "nvidia/nemotron-3-nano-30b-a3b:free"
     openai_cheap_model: str = "nvidia/nemotron-3-nano-30b-a3b:free"
     openai_base_url: str | None = "https://openrouter.ai/api/v1"

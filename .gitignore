@@ -63,5 +63,10 @@ uv.lock
 flagged/
 gradio_cached_examples/
 
+# Node.js (frontend)
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
 # Docker
 *.tar
