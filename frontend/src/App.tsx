@@ -21,13 +21,11 @@ export default function App() {
   const [isThinking, setIsThinking] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // Stats
   const [stats, setStats] = useState<StatsData | null>(null)
   const [health, setHealth] = useState<HealthData | null>(null)
   const [statsLoading, setStatsLoading] = useState(false)
   const [statsError, setStatsError] = useState<string | null>(null)
 
-  // Files
   const [files, setFiles] = useState<{ name: string; status: 'loading' | 'ok' | 'error'; chunks?: number; error?: string }[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -41,7 +39,6 @@ export default function App() {
     scrollToBottom()
   }, [messages, isThinking, scrollToBottom])
 
-  // Load stats on mount
   useEffect(() => {
     refreshStats()
   }, [])
@@ -130,7 +127,6 @@ export default function App() {
         },
       })
 
-      // Finalize message
       setMessages(prev =>
         prev.map(m => m.id === assistantId ? {
           ...m,
@@ -142,7 +138,6 @@ export default function App() {
         } : m)
       )
 
-      // If no assistant message was created (empty stream), create one
       setMessages(prev => {
         if (!prev.find(m => m.id === assistantId)) {
           return [...prev, {
@@ -204,11 +199,9 @@ export default function App() {
 
   return (
     <>
-      {/* Grid background (coming-soon-01) */}
       <div className="grid-bg" />
 
       <div className="flex flex-col h-screen relative z-[1]">
-        {/* Header with notch (adaptive-notch-navigation-bar) */}
         <Header
           embeddingModel={stats?.embedding_model || 'BGE-M3'}
           llmProvider={llmProvider}
@@ -216,19 +209,15 @@ export default function App() {
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         />
 
-        {/* Main layout */}
         <div className="flex flex-1 min-h-0">
-          {/* Left: Sources panel */}
-          <aside className={`hidden md:flex w-[260px] min-w-[220px] bg-bg-secondary border-r border-white/[0.06] flex-col ${sidebarOpen ? '!flex fixed top-14 left-0 bottom-0 z-[100] w-[280px] shadow-2xl' : ''}`}>
+          <aside className={`hidden md:flex w-[260px] min-w-[220px] bg-card border-r border-border flex-col ${sidebarOpen ? '!flex fixed top-12 left-0 bottom-0 z-[100] w-[280px] shadow-2xl' : ''}`}>
             <SourcesPanel
               files={files}
               onUploadClick={() => fileInputRef.current?.click()}
             />
           </aside>
 
-          {/* Center: Chat */}
           <main className="flex-1 min-w-0 flex flex-col">
-            {/* Messages area */}
             <div className="flex-1 overflow-y-auto px-8 py-6 flex flex-col gap-6">
               <AnimatePresence mode="wait">
                 {messages.length === 0 && !isThinking && (
@@ -256,7 +245,6 @@ export default function App() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input area (ai-chat-input) */}
             <ChatInput
               onSend={handleSend}
               onAttach={() => fileInputRef.current?.click()}
@@ -265,8 +253,7 @@ export default function App() {
             />
           </main>
 
-          {/* Right: Stats panel */}
-          <aside className="hidden lg:flex w-[260px] min-w-[220px] bg-bg-secondary border-l border-white/[0.06] flex-col">
+          <aside className="hidden lg:flex w-[260px] min-w-[220px] bg-card border-l border-border flex-col">
             <StatsPanel
               stats={stats}
               health={health}
@@ -277,7 +264,6 @@ export default function App() {
           </aside>
         </div>
 
-        {/* Hidden file input */}
         <input
           ref={fileInputRef}
           type="file"

@@ -3,141 +3,107 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  :root {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --radius: 0.75rem;
+    --radius-control: 8px;
+    --warm: 24 95% 53%;
+    --notch-bg: 0 0% 4%;
   }
 
-  html, body, #root {
-    height: 100%;
-    overflow: hidden;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body, #root { height: 100%; overflow: hidden; }
+  body { background: hsl(var(--background)); color: hsl(var(--foreground)); }
 
-  ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 10px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.12);
-  }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.3); }
 }
 
-/* Grid background pattern (coming-soon-01) */
+/* Grid background */
 .grid-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.3;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
   background-size: 32px 32px;
-  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 70%);
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 70%);
-}
-
-/* Notch wing SVG fills */
-.notch-wing {
-  fill: #0c0c10;
-}
-
-/* Shimmer gradient for thinking card */
-.thinking-shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(99, 102, 241, 0.04) 40%,
-    rgba(99, 102, 241, 0.08) 50%,
-    rgba(99, 102, 241, 0.04) 60%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
 }
 
 /* Stream cursor */
 .stream-cursor {
-  display: inline-block;
-  width: 2px;
-  height: 1.1em;
-  margin-left: 2px;
-  background: #6366f1;
-  border-radius: 1px;
-  vertical-align: text-bottom;
-  animation: cursor-pulse 1.2s ease-in-out infinite;
+  display: inline-block; width: 2px; height: 1em;
+  margin-left: 2px; border-radius: 1px; vertical-align: text-bottom;
+  background: hsl(var(--foreground));
+  animation: cursor-blink 1.2s ease-in-out infinite;
 }
 
 /* Source chip inline */
 .source-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  background: rgba(99, 102, 241, 0.12);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  color: #818cf8;
-  padding: 1px 7px;
-  border-radius: 6px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  vertical-align: middle;
-  margin: 0 1px;
+  display: inline-flex; align-items: center; gap: 3px;
+  background: hsl(var(--muted)); border: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground)); padding: 1px 6px;
+  border-radius: 5px; font-family: var(--font-mono, monospace);
+  font-size: 10.5px; font-weight: 600; cursor: pointer;
+  transition: all 0.15s ease; vertical-align: middle; margin: 0 1px;
 }
-.source-chip:hover {
-  background: rgba(99, 102, 241, 0.25);
-  color: #fff;
-}
+.source-chip:hover { background: hsl(var(--accent)); color: hsl(var(--foreground)); }
 
-/* Markdown styling in bubbles */
-.bubble-content h1,
-.bubble-content h2,
-.bubble-content h3 {
-  margin: 12px 0 6px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+/* Markdown in bubble-content */
+.bubble-content h1, .bubble-content h2, .bubble-content h3 {
+  margin: 12px 0 6px; font-weight: 600; letter-spacing: -0.01em;
 }
 .bubble-content h1 { font-size: 16px; }
 .bubble-content h2 { font-size: 15px; }
 .bubble-content h3 { font-size: 14px; }
 .bubble-content p { margin: 6px 0; }
-.bubble-content ul,
-.bubble-content ol { margin: 6px 0; padding-left: 20px; }
+.bubble-content ul, .bubble-content ol { margin: 6px 0; padding-left: 20px; }
 .bubble-content li { margin: 3px 0; }
 .bubble-content code {
-  background: rgba(99, 102, 241, 0.08);
-  padding: 2px 6px;
-  border-radius: 5px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  background: hsl(var(--muted)); padding: 2px 6px; border-radius: 5px;
+  font-family: var(--font-mono, monospace); font-size: 12px;
 }
 .bubble-content pre {
-  background: #0a0a0f;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  padding: 14px 16px;
-  margin: 10px 0;
-  overflow-x: auto;
+  background: hsl(var(--background)); border: 1px solid hsl(var(--border));
+  border-radius: 10px; padding: 14px 16px; margin: 10px 0; overflow-x: auto;
 }
-.bubble-content pre code {
-  background: none;
-  padding: 0;
-  font-size: 11.5px;
-  line-height: 1.65;
+.bubble-content pre code { background: none; padding: 0; font-size: 11.5px; line-height: 1.65; }
+.bubble-content strong { font-weight: 600; color: hsl(var(--foreground)); }
+.bubble-content em { font-style: italic; color: hsl(var(--muted-foreground)); }
+
+/* Shimmer overlay */
+.shimmer-overlay {
+  background: linear-gradient(110deg, transparent 35%, hsl(var(--foreground) / 0.04) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 5s linear infinite;
 }
-.bubble-content strong {
-  font-weight: 600;
-  color: #fafafa;
+
+/* Think scroll animation */
+.think-scroll {
+  animation: think-scroll 12s linear infinite;
 }
-.bubble-content em {
-  font-style: italic;
-  color: #a1a1aa;
+
+@keyframes think-scroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
 }

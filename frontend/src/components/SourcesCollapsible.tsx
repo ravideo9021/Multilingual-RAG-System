@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
-import { cn, escapeHtml } from '@/lib/utils'
+import { cn, escapeHtml, spring } from '@/lib/utils'
 import type { SourceHit } from '@/types'
 
 interface SourcesCollapsibleProps {
@@ -19,11 +19,11 @@ export function SourcesCollapsible({ sources }: SourcesCollapsibleProps) {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setOpen(!open)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-[11px] font-medium text-indigo-400 bg-accent-subtle border border-accent/20 cursor-pointer transition-colors hover:bg-accent-glow hover:text-white"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-[11px] font-medium text-muted-foreground bg-secondary border border-border cursor-pointer transition-colors hover:bg-accent hover:text-foreground"
       >
         <motion.span
           animate={{ rotate: open ? 90 : 0 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          transition={spring}
         >
           <ChevronRight size={12} />
         </motion.span>
@@ -62,11 +62,11 @@ function SourceCard({ source }: { source: SourceHit }) {
     <motion.div
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-bg-card border border-white/[0.06] rounded-[10px] p-2.5 px-3.5 transition-colors hover:border-white/10 hover:bg-bg-card-hover"
+      className="bg-card border border-border rounded-lg p-2.5 px-3.5 transition-colors hover:border-foreground/10 hover:bg-secondary/50"
     >
       <div className="flex justify-between items-center mb-1">
-        <span className="text-xs font-semibold text-white flex items-center gap-1.5">
-          <span className="font-mono text-[9px] font-bold bg-accent-glow text-indigo-400 px-1.5 py-0.5 rounded">
+        <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+          <span className="font-mono text-[9px] font-bold bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">
             #{source.rank}
           </span>
           {escapeHtml(name)}
@@ -82,7 +82,7 @@ function SourceCard({ source }: { source: SourceHit }) {
           {pct}%
         </span>
       </div>
-      <p className="text-xs text-zinc-500 leading-relaxed line-clamp-3">
+      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
         {text}{source.text && source.text.length > 200 ? '...' : ''}
       </p>
     </motion.div>

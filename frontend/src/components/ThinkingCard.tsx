@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2 } from 'lucide-react'
 
 const THINKING_LINES = [
   'Analyzing query language and intent...',
@@ -31,31 +30,26 @@ export function ThinkingCard() {
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className="flex flex-col gap-2.5 max-w-[460px]"
     >
-      {/* Header with spinner and timer */}
       <div className="flex items-center gap-2">
-        <Loader2 size={16} className="text-accent animate-spin" />
-        <span className="text-[13px] font-medium text-zinc-400">Thinking</span>
-        <span className="font-mono text-[11px] text-zinc-600 tabular-nums">
+        <div className="relative w-4 h-4">
+          <div className="absolute inset-0 rounded-full border-[1.5px] border-border" />
+          <div className="absolute inset-0 rounded-full border-[1.5px] border-t-warm border-r-transparent border-b-transparent border-l-transparent animate-spin" />
+        </div>
+        <span className="text-[13px] font-medium text-muted-foreground">Thinking</span>
+        <span className="font-mono text-[11px] text-muted-foreground/50 tabular-nums">
           {(elapsed / 1000).toFixed(1)}s
         </span>
       </div>
 
-      {/* Auto-scrolling text card with shimmer and fade overlays (ai-thinking) */}
-      <div className="relative h-[110px] overflow-hidden bg-bg-card border border-white/[0.06] rounded-xl">
-        {/* Top fade overlay */}
-        <div className="absolute top-0 left-0 right-0 h-9 z-[3] pointer-events-none bg-gradient-to-b from-bg-card via-bg-card/80 to-transparent" />
+      <div className="relative h-[110px] overflow-hidden bg-card border border-border rounded-xl">
+        <div className="absolute top-0 left-0 right-0 h-8 z-[3] pointer-events-none bg-gradient-to-b from-card to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-8 z-[3] pointer-events-none bg-gradient-to-t from-card to-transparent" />
+        <div className="absolute inset-0 z-[2] pointer-events-none shimmer-overlay" />
 
-        {/* Bottom fade overlay */}
-        <div className="absolute bottom-0 left-0 right-0 h-9 z-[3] pointer-events-none bg-gradient-to-t from-bg-card via-bg-card/80 to-transparent" />
-
-        {/* Shimmer effect */}
-        <div className="absolute inset-0 z-[2] pointer-events-none thinking-shimmer animate-shimmer" />
-
-        {/* Scrolling content */}
-        <div className="p-3.5 px-4 font-mono text-[11px] leading-relaxed text-zinc-600 overflow-hidden h-full">
-          <div className="animate-think-scroll">
+        <div className="p-3.5 px-4 font-mono text-[11px] leading-relaxed text-muted-foreground/50 overflow-hidden h-full">
+          <div className="think-scroll">
             {[...THINKING_LINES, ...THINKING_LINES].map((line, i) => (
-              <div key={i} className="py-0.5 opacity-70">{line}</div>
+              <div key={i} className="py-0.5">{line}</div>
             ))}
           </div>
         </div>

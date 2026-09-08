@@ -29,11 +29,7 @@ export function MessageActions({ answer, onRetry }: MessageActionsProps) {
       transition={{ delay: 0.1, duration: 0.3 }}
       className="flex items-center gap-0.5 mt-2"
     >
-      <ActionButton
-        onClick={handleCopy}
-        tooltip={copied ? 'Copied!' : 'Copy'}
-        active={copied}
-      >
+      <ActionButton onClick={handleCopy} tooltip={copied ? 'Copied!' : 'Copy'} active={copied}>
         {copied ? <Check size={14} /> : <Copy size={14} />}
       </ActionButton>
 
@@ -41,21 +37,13 @@ export function MessageActions({ answer, onRetry }: MessageActionsProps) {
         <RotateCcw size={14} />
       </ActionButton>
 
-      <div className="w-px h-4 bg-white/[0.06] mx-1" />
+      <div className="w-px h-3.5 bg-border mx-1" />
 
-      <ActionButton
-        onClick={() => handleVote('up')}
-        tooltip="Good"
-        active={vote === 'up'}
-      >
+      <ActionButton onClick={() => handleVote('up')} tooltip="Good" active={vote === 'up'}>
         <ThumbsUp size={14} />
       </ActionButton>
 
-      <ActionButton
-        onClick={() => handleVote('down')}
-        tooltip="Bad"
-        active={vote === 'down'}
-      >
+      <ActionButton onClick={() => handleVote('down')} tooltip="Bad" active={vote === 'down'}>
         <ThumbsDown size={14} />
       </ActionButton>
     </motion.div>
@@ -80,12 +68,12 @@ function ActionButton({
       transition={springBouncy}
       onClick={onClick}
       className={cn(
-        'relative group flex items-center justify-center w-[30px] h-[30px] rounded-lg border-0 bg-transparent cursor-pointer transition-colors',
-        active ? 'text-accent' : 'text-zinc-600 hover:text-zinc-400 hover:bg-bg-card'
+        'relative group flex items-center justify-center w-7 h-7 rounded-md border-0 bg-transparent cursor-pointer transition-colors',
+        active ? 'text-warm' : 'text-muted-foreground/50 hover:text-foreground hover:bg-secondary'
       )}
     >
       {children}
-      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 rounded-md bg-bg-card border border-white/10 text-zinc-400 text-[10px] whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 rounded-md bg-popover border border-border text-muted-foreground text-[10px] whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
         {tooltip}
       </span>
     </motion.button>

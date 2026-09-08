@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Menu } from 'lucide-react'
-import { cn, springBouncy } from '@/lib/utils'
+import { cn, spring } from '@/lib/utils'
 
 interface HeaderProps {
   embeddingModel: string
@@ -9,55 +9,60 @@ interface HeaderProps {
   onToggleSidebar: () => void
 }
 
+function NotchWing({ flip }: { flip?: boolean }) {
+  return (
+    <svg
+      className={cn(
+        'absolute top-1/2 -translate-y-1/2 w-5 h-8 hidden lg:block',
+        flip ? 'left-full -scale-x-100' : 'right-full'
+      )}
+      viewBox="0 0 20 32"
+      fill="hsl(var(--notch-bg))"
+    >
+      <path d="M20 0 C20 0, 20 10, 14 16 C8 22, 0 24, 0 32 L20 32Z" />
+    </svg>
+  )
+}
+
 export function Header({ embeddingModel, llmProvider, isLive, onToggleSidebar }: HeaderProps) {
   return (
-    <header className="flex items-center justify-center h-14 shrink-0 bg-bg-secondary border-b border-white/[0.06] relative z-50">
+    <header className="flex items-center justify-center h-12 shrink-0 bg-card border-b border-border relative z-50">
       <div className="flex items-center justify-between w-full px-4">
-        {/* Left pills */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <motion.button
             whileTap={{ scale: 0.92 }}
             onClick={onToggleSidebar}
-            className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg bg-bg-card border border-white/[0.06] text-white"
+            className="md:hidden flex items-center justify-center w-7 h-7 rounded-control bg-secondary border border-border text-muted-foreground hover:text-foreground transition-colors"
           >
-            <Menu size={18} />
+            <Menu size={15} />
           </motion.button>
           <Pill>{embeddingModel.toUpperCase()}</Pill>
           <Pill>FAISS</Pill>
         </div>
 
-        {/* Center notch (adaptive-notch-navigation-bar) */}
         <div className="relative flex items-center justify-center">
-          <svg className="notch-wing absolute right-full top-1/2 -translate-y-1/2 w-6 h-10 hidden lg:block" viewBox="0 0 24 40">
-            <path d="M24 0 C24 0, 24 14, 16 20 C8 26, 0 28, 0 40 L24 40 L24 0Z" />
-          </svg>
-
+          <NotchWing />
           <motion.div
             whileHover={{ scale: 1.02 }}
-            transition={springBouncy}
-            className="flex items-center gap-2.5 bg-bg-primary border border-white/10 rounded-full py-1.5 px-4 pl-2 shadow-lg shadow-black/30"
-            style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)' }}
+            transition={spring}
+            className="flex items-center gap-2 bg-[hsl(var(--notch-bg))] border border-border rounded-full py-1 px-3.5 pl-2"
           >
             <motion.div
               whileHover={{ rotate: -8, scale: 1.1 }}
-              transition={springBouncy}
-              className="w-7 h-7 flex items-center justify-center bg-accent rounded-full"
+              transition={spring}
+              className="w-6 h-6 flex items-center justify-center bg-warm rounded-full"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary-foreground))" strokeWidth="2.5" strokeLinecap="round">
                 <path d="M12 3v18M3 12h18" />
               </svg>
             </motion.div>
-            <span className="font-serif text-[17px] text-white tracking-tight">
+            <span className="font-serif text-[15px] text-foreground tracking-tight">
               Multilingual RAG
             </span>
           </motion.div>
-
-          <svg className="notch-wing absolute left-full top-1/2 -translate-y-1/2 w-6 h-10 -scale-x-100 hidden lg:block" viewBox="0 0 24 40">
-            <path d="M24 0 C24 0, 24 14, 16 20 C8 26, 0 28, 0 40 L24 40 L24 0Z" />
-          </svg>
+          <NotchWing flip />
         </div>
 
-        {/* Right pills */}
         <div className="hidden md:flex items-center gap-1.5">
           <Pill live={isLive}>{llmProvider ? llmProvider.split('(')[0].trim() : 'LLM'}</Pill>
           <Pill>v0.2</Pill>
@@ -71,14 +76,17 @@ function Pill({ children, live }: { children: React.ReactNode; live?: boolean })
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-[10px] font-medium uppercase tracking-wide border transition-colors cursor-default whitespace-nowrap',
+        'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-mono text-[10px] font-medium uppercase tracking-[0.08em] border transition-colors cursor-default whitespace-nowrap',
         live
-          ? 'text-emerald-400 border-emerald-400/20 bg-bg-tertiary'
-          : 'text-zinc-600 border-white/[0.06] bg-bg-tertiary hover:text-zinc-500 hover:border-white/10'
+          ? 'text-emerald-400 border-emerald-400/20 bg-secondary'
+          : 'text-muted-foreground border-border bg-secondary hover:text-foreground'
       )}
     >
       {live && (
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+        </span>
       )}
       {children}
     </span>

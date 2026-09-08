@@ -37,9 +37,9 @@ export function FollowUpSuggestions({ query, onSelect }: FollowUpSuggestionsProp
           whileHover={{ y: -2, scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => onSelect(s)}
-          className="inline-flex items-center gap-1.5 px-3.5 py-[7px] rounded-full text-xs font-medium font-sans text-zinc-400 bg-bg-card border border-white/[0.06] cursor-pointer transition-shadow hover:bg-accent-glow hover:border-accent hover:text-white hover:shadow-md hover:shadow-indigo-500/10"
+          className="inline-flex items-center gap-1.5 px-3.5 py-[7px] rounded-full text-xs font-medium text-muted-foreground bg-card border border-border cursor-pointer transition-all hover:bg-secondary hover:border-foreground/10 hover:text-foreground"
         >
-          <ArrowRight size={12} className="opacity-50" />
+          <ArrowRight size={12} className="opacity-40" />
           {s}
         </motion.button>
       ))}

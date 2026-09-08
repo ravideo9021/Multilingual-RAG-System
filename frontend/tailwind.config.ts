@@ -2,6 +2,7 @@ import type { Config } from 'tailwindcss'
 
 const config: Config = {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
@@ -10,64 +11,45 @@ const config: Config = {
         mono: ['JetBrains Mono', 'SF Mono', 'Fira Code', 'monospace'],
       },
       colors: {
-        bg: {
-          primary: '#09090b',
-          secondary: '#0c0c10',
-          tertiary: '#131318',
-          card: '#18181b',
-          'card-hover': '#1f1f25',
-          input: '#111115',
-        },
-        accent: {
-          DEFAULT: '#6366f1',
-          hover: '#818cf8',
-          glow: 'rgba(99,102,241,0.12)',
-          'glow-strong': 'rgba(99,102,241,0.25)',
-          subtle: 'rgba(99,102,241,0.06)',
-        },
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        card: { DEFAULT: 'hsl(var(--card))', foreground: 'hsl(var(--card-foreground))' },
+        muted: { DEFAULT: 'hsl(var(--muted))', foreground: 'hsl(var(--muted-foreground))' },
+        accent: { DEFAULT: 'hsl(var(--accent))', foreground: 'hsl(var(--accent-foreground))' },
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        primary: { DEFAULT: 'hsl(var(--primary))', foreground: 'hsl(var(--primary-foreground))' },
+        secondary: { DEFAULT: 'hsl(var(--secondary))', foreground: 'hsl(var(--secondary-foreground))' },
+        destructive: { DEFAULT: 'hsl(var(--destructive))', foreground: 'hsl(var(--destructive-foreground))' },
+        popover: { DEFAULT: 'hsl(var(--popover))', foreground: 'hsl(var(--popover-foreground))' },
+        warm: 'hsl(var(--warm))',
       },
       borderRadius: {
-        xl: '16px',
-        '2xl': '24px',
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+        control: 'var(--radius-control)',
       },
       keyframes: {
-        'fade-in-word': {
-          from: { opacity: '0' },
-          to: { opacity: '1' },
-        },
-        shimmer: {
-          '0%': { backgroundPosition: '200% 0' },
-          '100%': { backgroundPosition: '-200% 0' },
-        },
-        float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-6px)' },
-        },
-        breathe: {
-          '0%, 100%': { transform: 'scale(1)', opacity: '0.4' },
-          '50%': { transform: 'scale(1.2)', opacity: '0.7' },
-        },
-        'pulse-dot': {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.4' },
-        },
-        'think-scroll': {
-          from: { transform: 'translateY(0)' },
-          to: { transform: 'translateY(-50%)' },
-        },
-        'cursor-pulse': {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.2' },
-        },
+        'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },
+        'fade-in-word': { from: { opacity: '0', filter: 'blur(4px)' }, to: { opacity: '1', filter: 'blur(0)' } },
+        'pop-in': { from: { opacity: '0', transform: 'scale(0.95)' }, to: { opacity: '1', transform: 'scale(1)' } },
+        'fade-up': { from: { opacity: '0', transform: 'translateY(8px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+        shimmer: { '0%': { backgroundPosition: '200% 0' }, '100%': { backgroundPosition: '-200% 0' } },
+        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } },
+        breathe: { '0%, 100%': { transform: 'scale(1)', opacity: '0.4' }, '50%': { transform: 'scale(1.15)', opacity: '0.7' } },
+        'cursor-blink': { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0' } },
       },
       animation: {
-        'fade-in-word': 'fade-in-word 0.35s cubic-bezier(0.16,1,0.3,1) forwards',
-        shimmer: 'shimmer 2s ease-in-out infinite',
+        'fade-in': 'fade-in 250ms ease-out both',
+        'fade-in-word': 'fade-in-word 300ms ease-out both',
+        'pop-in': 'pop-in 250ms cubic-bezier(0.23,1,0.32,1) both',
+        'fade-up': 'fade-up 350ms cubic-bezier(0.23,1,0.32,1) both',
+        shimmer: 'shimmer 5s linear infinite',
         float: 'float 4s ease-in-out infinite',
         breathe: 'breathe 3s ease-in-out infinite',
-        'pulse-dot': 'pulse-dot 2s ease-in-out infinite',
-        'think-scroll': 'think-scroll 14s linear infinite',
-        'cursor-pulse': 'cursor-pulse 1.2s ease-in-out infinite',
+        'cursor-blink': 'cursor-blink 1.2s ease-in-out infinite',
       },
     },
   },

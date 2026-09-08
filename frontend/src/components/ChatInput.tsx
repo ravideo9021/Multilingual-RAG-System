@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Paperclip, Mic, ArrowRight, Sun, BarChart3 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Paperclip, Mic, ArrowUp, Sparkles } from 'lucide-react'
 import { cn, springBouncy } from '@/lib/utils'
 import type { EffortLevel } from '@/types'
 
@@ -50,54 +50,37 @@ export function ChatInput({ onSend, onAttach, disabled, modelName }: ChatInputPr
   }
 
   return (
-    <div className="px-8 pb-5 pt-3" style={{ background: 'linear-gradient(to top, #09090b 60%, transparent)' }}>
+    <div className="px-6 pb-4 pt-2" style={{ background: 'linear-gradient(to top, hsl(var(--background)) 60%, transparent)' }}>
       <motion.div
         layout
         className={cn(
-          'max-w-[720px] mx-auto rounded-3xl px-4 pt-2.5 pb-2 transition-shadow',
-          'bg-bg-input border border-white/[0.06]',
-          'focus-within:border-indigo-500/30 focus-within:shadow-[0_0_0_3px_rgba(99,102,241,0.12),0_-4px_32px_rgba(0,0,0,0.2)]'
+          'max-w-[720px] mx-auto rounded-2xl px-4 pt-2.5 pb-2 transition-shadow',
+          'bg-card border border-border',
+          'focus-within:border-foreground/20 focus-within:shadow-[0_0_0_2px_hsl(var(--ring)/0.08)]'
         )}
-        style={{ boxShadow: '0 -4px 24px rgba(0,0,0,0.15)' }}
       >
-        {/* Top row: model pill + effort toggle (ai-chat-input) */}
         <div className="flex items-center gap-1.5 mb-1.5 px-0.5">
-          {/* Model indicator pill */}
-          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-bg-card border border-white/[0.06] font-mono text-[10px] font-semibold text-zinc-500 tracking-wide">
-            <Sun size={10} className="opacity-50" />
+          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary border border-border font-mono text-[10px] font-semibold text-muted-foreground tracking-wide">
+            <Sparkles size={10} className="text-warm opacity-70" />
             <span>{modelName}</span>
           </div>
 
-          {/* Effort level toggle with animated bars (ai-chat-input) */}
           <motion.button
             whileTap={{ scale: 0.95 }}
             transition={springBouncy}
             onClick={cycleEffort}
             className={cn(
-              'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border font-mono text-[10px] font-medium cursor-pointer transition-colors',
+              'inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-mono text-[10px] font-medium cursor-pointer transition-colors',
               effort === 2
-                ? 'text-indigo-400 border-indigo-500/20 bg-bg-card'
-                : 'text-zinc-600 border-white/[0.06] bg-bg-card hover:text-zinc-500'
+                ? 'text-warm border-warm/20 bg-secondary'
+                : 'text-muted-foreground border-border bg-secondary hover:text-foreground'
             )}
           >
-            <div className="flex items-end gap-[1px] h-2.5">
-              {[4, 7, 10].map((h, i) => (
-                <motion.span
-                  key={i}
-                  animate={{
-                    opacity: i <= effort ? 1 : 0.3,
-                    height: h,
-                  }}
-                  transition={springBouncy}
-                  className="w-[3px] rounded-sm bg-current"
-                />
-              ))}
-            </div>
+            <DynamicBars level={effort} />
             <span>{EFFORT_LABELS[effort]}</span>
           </motion.button>
         </div>
 
-        {/* Textarea */}
         <textarea
           ref={textareaRef}
           value={text}
@@ -105,18 +88,14 @@ export function ChatInput({ onSend, onAttach, disabled, modelName }: ChatInputPr
           onKeyDown={handleKeyDown}
           rows={1}
           placeholder="Ask anything in Hindi, English, or Hinglish..."
-          className="w-full bg-transparent border-none outline-none text-white text-sm font-sans leading-relaxed resize-none max-h-[140px] min-h-[24px] px-1 py-0 placeholder:text-zinc-600"
+          className="w-full bg-transparent border-none outline-none text-foreground text-sm leading-relaxed resize-none max-h-[140px] min-h-[24px] px-1 py-0 placeholder:text-muted-foreground/40"
         />
 
-        {/* Bottom row: actions (ai-chat-input) */}
         <div className="flex items-center justify-between mt-1.5 px-0.5">
           <div className="flex items-center gap-0.5">
-            {/* Attach button */}
             <InputIconButton onClick={onAttach} tooltip="Attach file">
               <Paperclip size={16} />
             </InputIconButton>
-
-            {/* Voice button with recording state */}
             <InputIconButton
               onClick={() => setIsRecording(!isRecording)}
               tooltip="Voice input"
@@ -126,7 +105,6 @@ export function ChatInput({ onSend, onAttach, disabled, modelName }: ChatInputPr
             </InputIconButton>
           </div>
 
-          {/* Send button with spring animation */}
           <motion.button
             whileHover={!disabled ? { scale: 1.06 } : undefined}
             whileTap={!disabled ? { scale: 0.94 } : undefined}
@@ -134,16 +112,31 @@ export function ChatInput({ onSend, onAttach, disabled, modelName }: ChatInputPr
             onClick={handleSend}
             disabled={disabled || !text.trim()}
             className={cn(
-              'w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer transition-all',
+              'w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all',
               disabled || !text.trim()
-                ? 'bg-accent/20 opacity-20 cursor-not-allowed'
-                : 'bg-accent text-white hover:bg-accent-hover hover:shadow-lg hover:shadow-indigo-500/25'
+                ? 'bg-muted opacity-30 cursor-not-allowed'
+                : 'bg-foreground text-background hover:bg-foreground/90'
             )}
           >
-            <ArrowRight size={16} />
+            <ArrowUp size={16} />
           </motion.button>
         </div>
       </motion.div>
+    </div>
+  )
+}
+
+function DynamicBars({ level }: { level: number }) {
+  return (
+    <div className="flex items-end gap-[1.5px] h-2.5">
+      {[4, 7, 10].map((h, i) => (
+        <motion.span
+          key={i}
+          animate={{ opacity: i <= level ? 1 : 0.25, height: h }}
+          transition={springBouncy}
+          className="w-[2.5px] rounded-sm bg-current"
+        />
+      ))}
     </div>
   )
 }
@@ -167,10 +160,10 @@ function InputIconButton({
       onClick={onClick}
       title={tooltip}
       className={cn(
-        'flex items-center justify-center w-8 h-8 rounded-[10px] bg-transparent border-none cursor-pointer transition-colors',
+        'flex items-center justify-center w-7 h-7 rounded-md bg-transparent border-none cursor-pointer transition-colors',
         active
-          ? 'text-red-400 animate-pulse-dot'
-          : 'text-zinc-600 hover:bg-bg-card hover:text-zinc-400'
+          ? 'text-red-400'
+          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
       )}
     >
       {children}
