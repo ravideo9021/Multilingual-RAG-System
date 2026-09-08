@@ -20,11 +20,13 @@ if _sys.platform == "darwin":
         pass
 
 import logging
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from app.config import settings
 from app.logging_setup import configure_logging
@@ -162,27 +164,27 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Multilingual RAG — Hindi/English",
         description="Cross-lingual retrieval-augmented generation",
-        version="0.1.0",
+        version="0.2.0",
         lifespan=lifespan,
     )
 
-    # CORS — allow localhost dev servers.
+    app.add_middleware(GZipMiddleware, minimum_size=500)
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://localhost:7860",
-            "http://localhost:8000",
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:5173",
-            "http://127.0.0.1:7860",
-            "http://127.0.0.1:8000",
-        ],
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @app.middleware("http")
+    async def add_timing_header(request: Request, call_next):
+        start = time.perf_counter()
+        response: Response = await call_next(request)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        response.headers["X-Response-Time"] = f"{elapsed_ms:.1f}ms"
+        return response
 
     from app.api.routes import router
 

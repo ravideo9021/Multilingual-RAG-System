@@ -8,13 +8,39 @@ of the pipeline.
 
 from __future__ import annotations
 
+import hashlib
 import logging
+from collections import OrderedDict
 from typing import Any
+
+import numpy as np
 
 from app.embeddings.base import EmbeddingModel
 from app.retrieval.vector_store import FaissStore
 
 logger = logging.getLogger(__name__)
+
+_CACHE_MAX = 128
+
+
+class _EmbeddingCache:
+    """LRU cache for query embeddings to avoid re-encoding repeated queries."""
+
+    def __init__(self, maxsize: int = _CACHE_MAX) -> None:
+        self._cache: OrderedDict[str, np.ndarray] = OrderedDict()
+        self._maxsize = maxsize
+
+    def get(self, key: str) -> np.ndarray | None:
+        if key in self._cache:
+            self._cache.move_to_end(key)
+            return self._cache[key]
+        return None
+
+    def put(self, key: str, value: np.ndarray) -> None:
+        self._cache[key] = value
+        self._cache.move_to_end(key)
+        if len(self._cache) > self._maxsize:
+            self._cache.popitem(last=False)
 
 
 class DenseRetriever:
@@ -37,6 +63,7 @@ class DenseRetriever:
             )
         self._embedder = embedder
         self._store = store
+        self._cache = _EmbeddingCache()
 
     @property
     def embedder(self) -> EmbeddingModel:
@@ -46,6 +73,15 @@ class DenseRetriever:
     def store(self) -> FaissStore:
         return self._store
 
+    def _encode_cached(self, query: str) -> np.ndarray:
+        key = hashlib.sha256(query.encode()).hexdigest()
+        cached = self._cache.get(key)
+        if cached is not None:
+            return cached
+        q_vec = self._embedder.encode_queries([query])[0]
+        self._cache.put(key, q_vec)
+        return q_vec
+
     def retrieve(self, query: str, k: int = 5) -> list[dict[str, Any]]:
         """Retrieve top-``k`` hits for a single query string."""
         if k < 1:
@@ -53,7 +89,5 @@ class DenseRetriever:
         if not query or not query.strip():
             return []
 
-        # encode_queries may add model-specific prefixes (E5 does).
-        q_vec = self._embedder.encode_queries([query])
-        # encode_queries returns (1, dim); pass the 1-D vector to search.
-        return self._store.search(q_vec[0], k=k)
+        q_vec = self._encode_cached(query)
+        return self._store.search(q_vec, k=k)

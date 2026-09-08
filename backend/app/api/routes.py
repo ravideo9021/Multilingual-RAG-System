@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from typing import Any
 
 from fastapi import APIRouter, Request, UploadFile
@@ -196,6 +197,7 @@ async def query(body: QueryRequest, request: Request):
     store = getattr(state, "store", None)
 
     async def _event_stream():
+        t0 = time.perf_counter()
         try:
             store_empty = store is None or len(store) == 0
 
@@ -265,6 +267,7 @@ async def query(body: QueryRequest, request: Request):
             logger.exception("Error during query streaming")
             yield {"event": "error", "data": str(exc)}
         finally:
-            yield {"event": "done", "data": ""}
+            elapsed = round((time.perf_counter() - t0) * 1000)
+            yield {"event": "done", "data": json.dumps({"elapsed_ms": elapsed})}
 
     return EventSourceResponse(_event_stream())

@@ -251,15 +251,27 @@ class FaissStore:
             raise ValueError(f"k must be >= 1, got {k}")
 
         scores, faiss_ids = self._index.search(q, k)
+        valid = [
+            (float(s), int(fi))
+            for s, fi in zip(scores[0], faiss_ids[0], strict=True)
+            if fi != -1
+        ]
+        if not valid:
+            return []
+
+        faiss_idx_list = [fi for _, fi in valid]
+        score_by_faiss = {fi: s for s, fi in valid}
+        placeholders = ",".join("?" * len(faiss_idx_list))
+        rows = self._meta.execute(
+            f"SELECT faiss_idx, id, text, source, language, metadata_json "
+            f"FROM chunks WHERE faiss_idx IN ({placeholders})",
+            faiss_idx_list,
+        ).fetchall()
+        row_by_faiss = {r[0]: r[1:] for r in rows}
+
         results: list[dict[str, Any]] = []
-        for score, faiss_idx in zip(scores[0], faiss_ids[0], strict=True):
-            if faiss_idx == -1:
-                continue
-            row = self._meta.execute(
-                "SELECT id, text, source, language, metadata_json "
-                "FROM chunks WHERE faiss_idx=?",
-                (int(faiss_idx),),
-            ).fetchone()
+        for faiss_idx in faiss_idx_list:
+            row = row_by_faiss.get(faiss_idx)
             if row is None:
                 continue
             id_, text, source, language, meta_json = row
@@ -267,7 +279,7 @@ class FaissStore:
             results.append(
                 {
                     "id": int(id_),
-                    "score": float(score),
+                    "score": score_by_faiss[faiss_idx],
                     "text": text,
                     "source": source,
                     "language": language,

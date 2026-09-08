@@ -75,7 +75,6 @@ class GeminiProvider(LLMProvider):
         temperature: float = 0.3,
     ) -> AsyncIterator[str]:
         import asyncio
-        import queue
 
         model = self._genai.GenerativeModel(
             model_name=self._model,
@@ -89,29 +88,23 @@ class GeminiProvider(LLMProvider):
 
         for attempt in range(_MAX_RETRIES):
             try:
-                # google-generativeai streaming is fully synchronous.
-                # Run the entire iteration in a thread; shuttle chunks
-                # back to the async side via a queue.
-                q: queue.Queue = queue.Queue()
+                aq: asyncio.Queue = asyncio.Queue()
 
                 def _run_sync():
                     try:
                         response = model.generate_content(prompt, stream=True)
                         for chunk in response:
                             if chunk.text:
-                                q.put(chunk.text)
+                                loop.call_soon_threadsafe(aq.put_nowait, chunk.text)
                     except Exception as exc:
-                        q.put(exc)
+                        loop.call_soon_threadsafe(aq.put_nowait, exc)
                     finally:
-                        q.put(_SENTINEL)
+                        loop.call_soon_threadsafe(aq.put_nowait, _SENTINEL)
 
                 loop.run_in_executor(None, _run_sync)
 
                 while True:
-                    # Poll queue without blocking the event loop.
-                    while q.empty():
-                        await asyncio.sleep(0.05)
-                    item = q.get_nowait()
+                    item = await aq.get()
                     if item is _SENTINEL:
                         return
                     if isinstance(item, Exception):
