@@ -34,12 +34,12 @@ export function FollowUpSuggestions({ query, onSelect }: FollowUpSuggestionsProp
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 + i * 0.08, duration: 0.4, ease }}
-          whileHover={{ scale: 1.01, x: 2 }}
-          whileTap={{ scale: 0.99 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => onSelect(s)}
-          className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl text-sm text-muted-foreground bg-card border border-border cursor-pointer sera-transition hover:bg-secondary hover:border-foreground/10 hover:text-foreground group"
+          className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl text-sm text-muted-foreground bg-card border border-border cursor-pointer transition-all duration-200 hover:bg-secondary hover:border-foreground/10 hover:text-foreground group"
         >
-          <ArrowRight size={14} className="text-muted-foreground/20 group-hover:text-foreground/40 sera-transition shrink-0" />
+          <ArrowRight size={14} className="text-muted-foreground/20 group-hover:text-foreground/40 transition-colors duration-200 shrink-0" />
           {s}
         </motion.button>
       ))}

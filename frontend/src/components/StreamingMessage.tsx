@@ -23,9 +23,9 @@ function LangBadge({ lang }: { lang?: string }) {
     <span
       className={cn(
         'text-[10px] font-semibold px-2 py-0.5 rounded-lg uppercase tracking-wide',
-        lang === 'hi' && 'bg-orange-400/8 text-orange-400/80',
-        lang === 'en' && 'bg-blue-400/8 text-blue-400/80',
-        lang === 'mix' && 'bg-purple-400/8 text-purple-400/80'
+        lang === 'hi' && 'bg-orange-400/10 text-orange-400/80',
+        lang === 'en' && 'bg-blue-400/10 text-blue-400/80',
+        lang === 'mix' && 'bg-purple-400/10 text-purple-400/80'
       )}
     >
       {label}
@@ -65,7 +65,7 @@ export function StreamingMessage({ message, originalQuery, onRetry, onFollowUp }
           </>
         ) : (
           <>
-            <div className="w-7 h-7 rounded-xl flex items-center justify-center text-[10px] font-bold text-accent-glow bg-card border border-border">
+            <div className="w-7 h-7 rounded-xl flex items-center justify-center text-[10px] font-bold text-primary bg-card border border-border">
               AI
             </div>
             <span className="text-[11px] font-medium text-muted-foreground">Assistant</span>
@@ -87,7 +87,7 @@ export function StreamingMessage({ message, originalQuery, onRetry, onFollowUp }
                   key={i}
                   initial={{ opacity: 0, filter: 'blur(4px)' }}
                   animate={{ opacity: 1, filter: 'blur(0px)' }}
-                  transition={{ duration: 0.35, ease }}
+                  transition={{ duration: 0.3, ease }}
                   className="inline"
                 >
                   {word}{' '}
@@ -103,7 +103,11 @@ export function StreamingMessage({ message, originalQuery, onRetry, onFollowUp }
           )}
 
           {!message.isStreaming && message.content && (
-            <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.15, duration: 0.4, ease }}
+            >
               {onRetry && <MessageActions answer={message.content} onRetry={onRetry} />}
               {message.sources && <SourcesCollapsible sources={message.sources} />}
 
@@ -117,7 +121,7 @@ export function StreamingMessage({ message, originalQuery, onRetry, onFollowUp }
               {originalQuery && onFollowUp && (
                 <FollowUpSuggestions query={originalQuery} onSelect={onFollowUp} />
               )}
-            </>
+            </motion.div>
           )}
         </div>
       )}

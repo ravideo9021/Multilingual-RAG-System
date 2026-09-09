@@ -6,10 +6,10 @@ import { ChatInput } from '@/components/ChatInput'
 import { StreamingMessage } from '@/components/StreamingMessage'
 import { ThinkingCard } from '@/components/ThinkingCard'
 import { SourcesPanel } from '@/components/SourcesPanel'
-import { StatsPanel } from '@/components/StatsPanel'
-import { fetchHealth, fetchStats, ingestFile, streamQuery } from '@/lib/api'
+import type { FileUploadItem } from '@/components/ui/file-upload'
+import { streamQuery } from '@/lib/api'
 import { detectLang } from '@/lib/utils'
-import type { Message, SourceHit, StatsData, HealthData } from '@/types'
+import { MODELS, type Message, type SourceHit, type ModelOption } from '@/types'
 
 function generateId() {
   return Math.random().toString(36).slice(2, 10)
@@ -20,14 +20,9 @@ export default function App() {
   const [isStreaming, setIsStreaming] = useState(false)
   const [isThinking, setIsThinking] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [selectedModel, setSelectedModel] = useState<ModelOption>(MODELS[0])
 
-  const [stats, setStats] = useState<StatsData | null>(null)
-  const [health, setHealth] = useState<HealthData | null>(null)
-  const [statsLoading, setStatsLoading] = useState(false)
-  const [statsError, setStatsError] = useState<string | null>(null)
-
-  const [files, setFiles] = useState<{ name: string; status: 'loading' | 'ok' | 'error'; chunks?: number; error?: string }[]>([])
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [files, setFiles] = useState<FileUploadItem[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const lastQueryRef = useRef('')
 
@@ -38,23 +33,6 @@ export default function App() {
   useEffect(() => {
     scrollToBottom()
   }, [messages, isThinking, scrollToBottom])
-
-  useEffect(() => {
-    refreshStats()
-  }, [])
-
-  const refreshStats = async () => {
-    setStatsLoading(true)
-    setStatsError(null)
-    try {
-      const [h, s] = await Promise.all([fetchHealth(), fetchStats()])
-      setHealth(h)
-      setStats(s)
-    } catch (e) {
-      setStatsError('Could not connect to backend.')
-    }
-    setStatsLoading(false)
-  }
 
   const handleSend = useCallback(async (text: string) => {
     if (isStreaming) return
@@ -175,54 +153,24 @@ export default function App() {
     handleSend(text)
   }, [handleSend])
 
-  const handleFileUpload = async (fileList: FileList | null) => {
-    if (!fileList) return
-    for (const file of Array.from(fileList)) {
-      const idx = files.length
-      setFiles(prev => [...prev, { name: file.name, status: 'loading' }])
-
-      try {
-        const result = await ingestFile(file)
-        setFiles(prev => prev.map((f, i) =>
-          i === idx ? { ...f, status: 'ok' as const, chunks: result.chunks } : f
-        ))
-      } catch (e) {
-        setFiles(prev => prev.map((f, i) =>
-          i === idx ? { ...f, status: 'error' as const, error: 'Failed' } : f
-        ))
-      }
-    }
-  }
-
-  const llmProvider = health?.llm_provider || ''
-  const modelName = llmProvider.match(/\(([^)]+)\)/)?.[1] || llmProvider.split('(')[0]?.trim() || 'Gemini'
-
   return (
     <div className="flex flex-col h-screen relative">
       <Header
-        embeddingModel={stats?.embedding_model || 'BGE-M3'}
-        llmProvider={llmProvider}
-        isLive={!!llmProvider}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         sidebarOpen={sidebarOpen}
+        fileCount={files.filter(f => f.status === 'success').length}
       />
 
       <div className="flex flex-1 min-h-0">
         <aside className={`hidden md:flex w-[280px] min-w-[240px] bg-background border-r border-border/50 flex-col ${sidebarOpen ? '!flex fixed top-14 left-0 bottom-0 z-[100] w-[300px] bg-background shadow-2xl shadow-black/50' : ''}`}>
-          <SourcesPanel
-            files={files}
-            onUploadClick={() => fileInputRef.current?.click()}
-          />
+          <SourcesPanel files={files} setFiles={setFiles} />
         </aside>
 
         <main className="flex-1 min-w-0 flex flex-col">
           <div className="flex-1 overflow-y-auto px-6 sm:px-10 py-8 flex flex-col gap-8">
             <AnimatePresence mode="wait">
               {messages.length === 0 && !isThinking && (
-                <Welcome
-                  key="welcome"
-                  onChipClick={handleSend}
-                />
+                <Welcome key="welcome" onChipClick={handleSend} />
               )}
             </AnimatePresence>
 
@@ -245,34 +193,20 @@ export default function App() {
 
           <ChatInput
             onSend={handleSend}
-            onAttach={() => fileInputRef.current?.click()}
+            onAttach={() => setSidebarOpen(true)}
             disabled={isStreaming}
-            modelName={modelName}
+            selectedModel={selectedModel}
+            onModelChange={setSelectedModel}
           />
         </main>
-
-        <aside className="hidden lg:flex w-[280px] min-w-[240px] bg-background border-l border-border/50 flex-col">
-          <StatsPanel
-            stats={stats}
-            health={health}
-            loading={statsLoading}
-            error={statsError}
-            onRefresh={refreshStats}
-          />
-        </aside>
       </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept=".pdf,.txt,.md,.html,.htm"
-        className="hidden"
-        onChange={e => {
-          handleFileUpload(e.target.files)
-          e.target.value = ''
-        }}
-      />
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-[99] bg-black/40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </div>
   )
 }

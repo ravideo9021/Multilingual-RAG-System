@@ -34,7 +34,7 @@ export function ThinkingCard() {
       <div className="flex items-center gap-2.5">
         <div className="relative w-5 h-5">
           <div className="absolute inset-0 rounded-full border-[1.5px] border-border" />
-          <div className="absolute inset-0 rounded-full border-[1.5px] border-t-accent-glow border-r-transparent border-b-transparent border-l-transparent animate-spin" />
+          <div className="absolute inset-0 rounded-full border-[1.5px] border-t-primary border-r-transparent border-b-transparent border-l-transparent animate-spin" />
         </div>
         <span className="text-sm font-medium text-muted-foreground">Thinking</span>
         <span className="text-xs text-muted-foreground/40 tabular-nums">

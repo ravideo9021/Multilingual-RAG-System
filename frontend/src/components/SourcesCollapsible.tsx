@@ -19,7 +19,7 @@ export function SourcesCollapsible({ sources }: SourcesCollapsibleProps) {
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
         onClick={() => setOpen(!open)}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-muted-foreground bg-card border border-border cursor-pointer sera-transition hover:bg-secondary hover:text-foreground"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-muted-foreground bg-card border border-border cursor-pointer transition-all duration-200 hover:bg-secondary hover:text-foreground"
       >
         <motion.span
           animate={{ rotate: open ? 90 : 0 }}
@@ -62,7 +62,7 @@ function SourceCard({ source }: { source: SourceHit }) {
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card border border-border rounded-2xl p-4 sera-transition hover:border-foreground/10 hover:bg-secondary/50"
+      className="bg-card border border-border rounded-2xl p-4 transition-all duration-200 hover:border-foreground/10 hover:bg-secondary/50"
     >
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm font-medium text-foreground flex items-center gap-2">
@@ -74,9 +74,9 @@ function SourceCard({ source }: { source: SourceHit }) {
         <span
           className={cn(
             'text-[11px] font-semibold px-2.5 py-0.5 rounded-lg',
-            tier === 'high' && 'bg-emerald-500/8 text-emerald-400',
-            tier === 'mid' && 'bg-yellow-500/8 text-yellow-400',
-            tier === 'low' && 'bg-red-500/8 text-red-400'
+            tier === 'high' && 'bg-emerald-500/10 text-emerald-400',
+            tier === 'mid' && 'bg-yellow-500/10 text-yellow-400',
+            tier === 'low' && 'bg-red-500/10 text-red-400'
           )}
         >
           {pct}%

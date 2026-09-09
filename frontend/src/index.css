@@ -24,7 +24,19 @@
     --input: 0 0% 12%;
     --ring: 0 0% 30%;
     --radius: 1.25rem;
-    --accent-glow: 30 80% 55%;
+
+    --ink: #e5e5e5;
+    --ink-2: #9a9da3;
+    --ink-3: #62656b;
+    --canvas: hsl(0 0% 6.5%);
+    --surface: hsl(0 0% 8%);
+    --inset: hsl(0 0% 5%);
+    --hover: hsl(0 0% 10%);
+    --hover-2: hsl(0 0% 14%);
+    --line: hsl(0 0% 14%);
+    --line-strong: hsl(0 0% 18%);
+    --radius-control: 8px;
+    --shadow-hairline: 0 0 0 1px hsl(0 0% 14%);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -91,16 +103,44 @@
 }
 
 /* Think scroll animation */
-.think-scroll {
-  animation: think-scroll 14s linear infinite;
+.think-scroll { animation: think-scroll 14s linear infinite; }
+
+/* Prompt scrollbar */
+.prompt-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; background: transparent; }
+.prompt-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.prompt-scrollbar::-webkit-scrollbar-thumb { background: transparent; border-radius: 4px; }
+.prompt-scrollbar:hover::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.3); }
+
+/* Animated underline */
+.animated-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0% 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.animated-underline:hover { background-size: 100% 1px; }
 
 @keyframes think-scroll {
   0% { transform: translateY(0); }
   100% { transform: translateY(-50%); }
 }
 
-/* Sera-style smooth transition utility */
-.sera-transition {
-  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fade-up {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes skeleton-shimmer {
+  100% { transform: translateX(100%); }
 }

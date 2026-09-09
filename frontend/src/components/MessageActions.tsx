@@ -67,12 +67,12 @@ function ActionButton({
       whileTap={{ scale: 0.92 }}
       onClick={onClick}
       className={cn(
-        'relative group flex items-center justify-center w-8 h-8 rounded-xl border-0 bg-transparent cursor-pointer sera-transition',
-        active ? 'text-accent-glow' : 'text-muted-foreground/40 hover:text-foreground hover:bg-card'
+        'relative group flex items-center justify-center w-8 h-8 rounded-xl border-0 bg-transparent cursor-pointer transition-all duration-200',
+        active ? 'text-primary' : 'text-muted-foreground/40 hover:text-foreground hover:bg-card'
       )}
     >
       {children}
-      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1 rounded-lg bg-card border border-border text-muted-foreground text-[10px] whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 sera-transition">
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1 rounded-lg bg-card border border-border text-muted-foreground text-[10px] whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         {tooltip}
       </span>
     </motion.button>
